@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Elementos de Red</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="config.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #0b141d;
+      --card-color: #14212d;
+      --accent-color: #00b894;
+      --hover-color: #00d1a7;
+      --text-color: #ffffff;
+      --muted-text: #a0aec0;
+      --border-color: #2c3e50;
+      --danger-color: #e74c3c;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .login-wrapper {
+      background: var(--card-color);
+      padding: 40px 30px;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 350px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+      border: 1px solid var(--border-color);
+      text-align: center;
+    }
+
+    .logo-container {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      display: inline-block;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+
+    .logo-container img {
+      width: 160px;
+      display: block;
+    }
+
+    .login-title {
+      margin: 0 0 20px 0;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .input-group i.icon-left {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted-text);
+      z-index: 2;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 12px 15px 12px 40px;
+      box-sizing: border-box;
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-color);
+      font-size: 15px;
+      outline: none;
+    }
+
+    .input-group input:focus {
+      border-color: var(--accent-color);
+    }
+
+    .btn-toggle-pass {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: var(--muted-text);
+      padding: 0;
+    }
+
+    .btn-enviar {
+      background: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 14px;
+      width: 100%;
+      cursor: pointer;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 15px;
+      letter-spacing: 1px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-enviar:hover {
+      background: var(--hover-color);
+    }
+
+    .btn-enviar:disabled {
+      background: #34495e;
+      cursor: not-allowed;
+    }
+
+    .error-message {
+      color: var(--danger-color);
+      font-size: 13px;
+      margin-top: 15px;
+      display: none;
+      font-weight: bold;
+    }
+
+    .custom-select-group {
+      position: relative;
+    }
+
+    .custom-select-group input {
+      cursor: pointer;
+    }
+
+    .custom-dropdown {
+      display: none;
+      position: absolute;
+      top: 48px;
+      left: 0;
+      right: 0;
+      background: var(--card-color);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      z-index: 1000;
+      max-height: 240px;
+      overflow-y: auto;
+      box-shadow: 0 8px 14px rgba(0,0,0,0.45);
+    }
+
+    .custom-dropdown.show {
+      display: block;
+    }
+
+    .dropdown-search {
+      width: 100%;
+      padding: 10px 12px !important;
+      box-sizing: border-box;
+      background: var(--bg-color) !important;
+      border: none !important;
+      border-bottom: 1px solid var(--border-color) !important;
+      border-radius: 0 !important;
+      color: var(--text-color) !important;
+      outline: none;
+      font-size: 14px;
+      cursor: text !important;
+    }
+
+    .dropdown-option {
+      padding: 11px 12px;
+      cursor: pointer;
+      color: var(--text-color);
+      font-size: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .dropdown-option:hover,
+    .dropdown-option.selected {
+      background: var(--accent-color);
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .dropdown-empty {
+      padding: 12px;
+      color: var(--muted-text);
+      font-size: 13px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="login-wrapper">
+
+    <div class="logo-container">
+      <img src="https://raw.githubusercontent.com/zelaya27/IMAGENES_AZ/main/UTCD%20Vertical.png" alt="Logo UTCD">
+    </div>
+
+    <h2 class="login-title">PANEL ELEMENTOS DE RED</h2>
+
+    <div class="input-group custom-select-group">
+      <i class="fas fa-map-marker-alt icon-left"></i>
+      <input type="text" id="sector" placeholder="Seleccione sector" autocomplete="off" readonly onclick="abrirDropdown('sector')">
+
+      <div class="custom-dropdown" id="dropdown-sector">
+        <input type="text" class="dropdown-search" placeholder="Buscar sector..." onkeyup="filtrarDropdown('sector')" onclick="event.stopPropagation()">
+        <div id="lista-sector"></div>
+      </div>
+    </div>
+
+    <div class="input-group custom-select-group">
+      <i class="fas fa-user icon-left"></i>
+      <input type="text" id="user" placeholder="Seleccione usuario" autocomplete="off" readonly onclick="abrirDropdown('user')">
+
+      <div class="custom-dropdown" id="dropdown-user">
+        <input type="text" class="dropdown-search" placeholder="Buscar usuario..." onkeyup="filtrarDropdown('user')" onclick="event.stopPropagation()">
+        <div id="lista-user"></div>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <i class="fas fa-lock icon-left"></i>
+      <input type="password" id="pass" placeholder="Contraseña">
+
+      <button type="button" class="btn-toggle-pass" onclick="togglePassword()">
+        <i class="fas fa-eye" id="eye-icon"></i>
+      </button>
+    </div>
+
+    <button class="btn-enviar" id="btn-login" onclick="iniciarSesion()">
+      <span>INICIAR SESIÓN</span>
+      <i class="fas fa-sign-in-alt"></i>
+    </button>
+
+    <div id="mensaje-error" class="error-message"></div>
+
+  </div>
+
+  <script>
+    const SECTORES = [
+      "BRUS LAGUNA",
+      "CHOLUTECA",
+      "COMAYAGUA",
+      "DANLI",
+      "EL PROGRESO",
+      "GUANAJA",
+      "JUTICALPA",
+      "LA CEIBA",
+      "SAN PEDRO SULA CENTRO",
+      "SANTA CRUZ DE YOJOA",
+      "SANTA ROSA DE COPAN",
+      "TEGUCIGALPA",
+      "TOCOA",
+      "VILLANUEVA",
+      "SANTA BARBARA"
+    ];
+
+    let usuariosSector = [];
+
+    document.addEventListener("DOMContentLoaded", function() {
+      pintarOpciones("sector", SECTORES);
+    });
+
+    function togglePassword() {
+      const p = document.getElementById("pass");
+      const icon = document.getElementById("eye-icon");
+
+      if (p.type === "password") {
+        p.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+      } else {
+        p.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+      }
+    }
+
+    function abrirDropdown(tipo) {
+      document.querySelectorAll(".custom-dropdown").forEach(d => d.classList.remove("show"));
+
+      if (tipo === "user" && !document.getElementById("sector").value.trim()) {
+        mostrarError("Primero selecciona un sector.");
+        return;
+      }
+
+      const dropdown = document.getElementById("dropdown-" + tipo);
+      dropdown.classList.add("show");
+
+      const search = dropdown.querySelector(".dropdown-search");
+      search.value = "";
+      setTimeout(() => search.focus(), 100);
+
+      if (tipo === "sector") {
+        pintarOpciones("sector", SECTORES);
+      } else {
+        pintarOpciones("user", usuariosSector);
+      }
+    }
+
+    function pintarOpciones(tipo, lista) {
+      const contenedor = document.getElementById("lista-" + tipo);
+      const valorActual = document.getElementById(tipo).value.trim();
+
+      contenedor.innerHTML = "";
+
+      if (!lista || lista.length === 0) {
+        contenedor.innerHTML = '<div class="dropdown-empty">Sin resultados</div>';
+        return;
+      }
+
+      lista.forEach(valor => {
+        const div = document.createElement("div");
+        div.className = "dropdown-option";
+
+        if (valor === valorActual) {
+          div.classList.add("selected");
+        }
+
+        div.innerText = valor;
+
+        div.onclick = function(e) {
+          e.stopPropagation();
+          seleccionarOpcion(tipo, valor);
+        };
+
+        contenedor.appendChild(div);
+      });
+    }
+
+    function filtrarDropdown(tipo) {
+      const input = document.querySelector("#dropdown-" + tipo + " .dropdown-search");
+      const filtro = input.value.toUpperCase().trim();
+      const listaBase = tipo === "sector" ? SECTORES : usuariosSector;
+
+      const filtrados = listaBase.filter(item =>
+        item.toString().toUpperCase().includes(filtro)
+      );
+
+      pintarOpciones(tipo, filtrados);
+    }
+
+    async function seleccionarOpcion(tipo, valor) {
+      document.getElementById(tipo).value = valor;
+      document.getElementById("dropdown-" + tipo).classList.remove("show");
+
+      ocultarError();
+
+      if (tipo === "sector") {
+        document.getElementById("user").value = "";
+        usuariosSector = [];
+        pintarOpciones("user", []);
+        await cargarUsuariosPorSector(valor);
+      }
+    }
+
+    async function cargarUsuariosPorSector(sector) {
+      try {
+        const response = await fetch(CONFIG.URL_APPS_SCRIPT, {
+          method: "POST",
+          mode: "cors",
+          body: JSON.stringify({
+            action: "getUsuariosPorSector",
+            sector: sector
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.ok) {
+          usuariosSector = data.usuarios || [];
+          pintarOpciones("user", usuariosSector);
+
+          if (usuariosSector.length === 0) {
+            mostrarError("No hay usuarios registrados para este sector.");
+          }
+        } else {
+          mostrarError(data.error || "No se pudieron cargar los usuarios.");
+        }
+
+      } catch (error) {
+        mostrarError("Error cargando usuarios del sector.");
+      }
+    }
+
+    async function iniciarSesion() {
+      const sector = document.getElementById("sector").value.trim();
+      const user = document.getElementById("user").value.trim();
+      const pass = document.getElementById("pass").value.trim();
+      const btn = document.getElementById("btn-login");
+      const errorMsg = document.getElementById("mensaje-error");
+
+      if (!sector || !user || !pass) {
+        mostrarError("Por favor, completa sector, usuario y contraseña.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validando...';
+      errorMsg.style.display = "none";
+
+      try {
+        const response = await fetch(CONFIG.URL_APPS_SCRIPT, {
+          method: "POST",
+          mode: "cors",
+          body: JSON.stringify({
+            action: "login",
+            sector: sector,
+            user: user,
+            pass: pass
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.acceso) {
+          sessionStorage.setItem("usuario", data.usuario);
+          sessionStorage.setItem("tipo_usuario", data.tipo_usuario);
+          sessionStorage.setItem("id_tipous", data.id_tipous);
+          sessionStorage.setItem("sector", data.sector);
+          sessionStorage.setItem("cuadrilla", data.cuadrilla || "");
+
+          window.location.href = "panel.html";
+        } else {
+          mostrarError(data.error || "Usuario o contraseña incorrectos.");
+        }
+
+      } catch (error) {
+        mostrarError("Error de conexión. Revisa la URL del Apps Script.");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>INICIAR SESIÓN</span><i class="fas fa-sign-in-alt"></i>';
+      }
+    }
+
+    function mostrarError(texto) {
+      const errorMsg = document.getElementById("mensaje-error");
+      errorMsg.innerText = texto;
+      errorMsg.style.display = "block";
+    }
+
+    function ocultarError() {
+      const errorMsg = document.getElementById("mensaje-error");
+      errorMsg.innerText = "";
+      errorMsg.style.display = "none";
+    }
+
+    document.addEventListener("click", function(e) {
+      if (!e.target.closest(".custom-select-group")) {
+        document.querySelectorAll(".custom-dropdown").forEach(d => d.classList.remove("show"));
+      }
+    });
+
+    document.addEventListener("keypress", function(event) {
+      if (event.key === "Enter") {
+        iniciarSesion();
+      }
+    });
+  </script>
+
+</body>
+</html>
