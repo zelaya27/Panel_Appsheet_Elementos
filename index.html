@@ -48,7 +48,6 @@
       border-radius: 8px;
       display: inline-block;
       margin-bottom: 25px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
     }
 
     .logo-container img {
@@ -278,6 +277,32 @@
       pintarOpciones("sector", SECTORES);
     });
 
+    function apiJSONP(params) {
+      return new Promise((resolve, reject) => {
+        const callbackName = "jsonp_" + Date.now();
+
+        params.callback = callbackName;
+
+        const query = new URLSearchParams(params).toString();
+        const script = document.createElement("script");
+
+        window[callbackName] = function(data) {
+          resolve(data);
+          script.remove();
+          delete window[callbackName];
+        };
+
+        script.onerror = function() {
+          reject(new Error("Error conectando con Apps Script"));
+          script.remove();
+          delete window[callbackName];
+        };
+
+        script.src = CONFIG.URL_APPS_SCRIPT + "?" + query;
+        document.body.appendChild(script);
+      });
+    }
+
     function togglePassword() {
       const p = document.getElementById("pass");
       const icon = document.getElementById("eye-icon");
@@ -373,16 +398,10 @@
 
     async function cargarUsuariosPorSector(sector) {
       try {
-        const response = await fetch(CONFIG.URL_APPS_SCRIPT, {
-          method: "POST",
-          mode: "cors",
-          body: JSON.stringify({
-            action: "getUsuariosPorSector",
-            sector: sector
-          })
+        const data = await apiJSONP({
+          action: "getUsuariosPorSector",
+          sector: sector
         });
-
-        const data = await response.json();
 
         if (data.ok) {
           usuariosSector = data.usuarios || [];
@@ -405,7 +424,6 @@
       const user = document.getElementById("user").value.trim();
       const pass = document.getElementById("pass").value.trim();
       const btn = document.getElementById("btn-login");
-      const errorMsg = document.getElementById("mensaje-error");
 
       if (!sector || !user || !pass) {
         mostrarError("Por favor, completa sector, usuario y contraseña.");
@@ -414,21 +432,14 @@
 
       btn.disabled = true;
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validando...';
-      errorMsg.style.display = "none";
 
       try {
-        const response = await fetch(CONFIG.URL_APPS_SCRIPT, {
-          method: "POST",
-          mode: "cors",
-          body: JSON.stringify({
-            action: "login",
-            sector: sector,
-            user: user,
-            pass: pass
-          })
+        const data = await apiJSONP({
+          action: "login",
+          sector: sector,
+          user: user,
+          pass: pass
         });
-
-        const data = await response.json();
 
         if (data.acceso) {
           sessionStorage.setItem("usuario", data.usuario);
