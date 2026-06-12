@@ -484,33 +484,53 @@
     document.getElementById("nombreSector").textContent = sector || "";
   }
 
-  async function cargarElementos() {
-    try {
-      const response = await fetch(CONFIG.URL_APPS_SCRIPT, {
-        method: "POST",
-        mode: "cors",
-        body: JSON.stringify({
-          action: "obtenerElementos"
-        })
-      });
+ function apiJSONP(params) {
+  return new Promise((resolve, reject) => {
+    const callbackName = "jsonp_" + Date.now();
 
-      const data = await response.json();
+    params.callback = callbackName;
 
-      if (!data.ok) {
-        mostrarMensajeTabla(data.error || "No se pudieron cargar los elementos.", true);
-        return;
-      }
+    const query = new URLSearchParams(params).toString();
+    const script = document.createElement("script");
 
-      elementosGlobal = data.registros || [];
+    window[callbackName] = function(data) {
+      resolve(data);
+      script.remove();
+      delete window[callbackName];
+    };
 
-      llenarFiltros();
-      actualizarResumen();
-      renderizarTabla();
+    script.onerror = function() {
+      reject(new Error("Error conectando con Apps Script"));
+      script.remove();
+      delete window[callbackName];
+    };
 
-    } catch (error) {
-      mostrarMensajeTabla("Error de conexión con Apps Script.", true);
+    script.src = CONFIG.URL_APPS_SCRIPT + "?" + query;
+    document.body.appendChild(script);
+  });
+}
+
+async function cargarElementos() {
+  try {
+    const data = await apiJSONP({
+      action: "obtenerElementos"
+    });
+
+    if (!data.ok) {
+      mostrarMensajeTabla(data.error || "No se pudieron cargar los elementos.", true);
+      return;
     }
+
+    elementosGlobal = data.registros || [];
+
+    llenarFiltros();
+    actualizarResumen();
+    renderizarTabla();
+
+  } catch (error) {
+    mostrarMensajeTabla("Error de conexión con Apps Script.", true);
   }
+}
 
   function llenarFiltros() {
     llenarSelect("filtroPrioridad", obtenerUnicos(COL.PRIORIDAD), "Todas");
