@@ -1278,22 +1278,18 @@ async function abrirPDF(file) {
     alert("Error buscando el PDF en Drive.");
   }
 }
-function abrirMaps(lat, lng) {
 
+function abrirMaps(lat, lng) {
   if (!lat || !lng) {
     alert("Este registro no tiene coordenadas.");
     return;
   }
 
-  const url =
-    `https://www.google.com/maps?q=${encodeURIComponent(lat)},${encodeURIComponent(lng)}`;
-
+  const url = `https://www.google.com/maps?q=${encodeURIComponent(lat)},${encodeURIComponent(lng)}`;
   window.open(url, "_blank");
 }
 
-  
 async function ejecutarElemento(id) {
-
   if (!id) {
     alert("No se recibió ID del elemento.");
     return;
@@ -1301,10 +1297,25 @@ async function ejecutarElemento(id) {
 
   if (!confirm("¿Desea marcar este elemento como EJECUTADO?")) {
     return;
- 
-    const url = `https://www.google.com/maps?q=${encodeURIComponent(lat)},${encodeURIComponent(lng)}`;
-    window.open(url, "_blank");
   }
+
+  try {
+    const data = await apiJSONP({
+      action: "ejecutarElemento",
+      id: id
+    });
+
+    if (data.ok) {
+      alert("Elemento ejecutado correctamente.");
+      await cargarElementos();
+    } else {
+      alert(data.error || "No se pudo ejecutar el elemento.");
+    }
+
+  } catch (error) {
+    alert("Error actualizando el estado.");
+  }
+}
 
   function limpiarFiltros() {
     document.getElementById("filtroEstado").value = "ALL";
