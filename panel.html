@@ -1225,43 +1225,32 @@
     return `<span class="badge ${clase}">${escaparHtml(estado || "")}</span>`;
   }
 
-function abrirPDF(file) {
+async function abrirPDF(file) {
   if (!file) {
     alert("Este registro no tiene PDF.");
     return;
   }
 
-  // Si ya es URL completa
   if (file.startsWith("http")) {
     window.open(file, "_blank");
     return;
   }
 
-  const appName = CONFIG.APPSHEET_APP_NAME || "";
-  const tableName = "ELEMENTOS_DE_RED";
+  try {
+    const data = await apiJSONP({
+      action: "obtenerUrlPdfDrive",
+      ruta: file
+    });
 
-  if (!appName) {
-    alert("Falta configurar CONFIG.APPSHEET_APP_NAME.");
-    return;
+    if (data.ok && data.url) {
+      window.open(data.url, "_blank");
+    } else {
+      alert(data.error || "No se encontró el PDF.");
+    }
+
+  } catch (error) {
+    alert("Error buscando el PDF en Drive.");
   }
-
-  let fileName = String(file).trim();
-
-  // Eliminar carpeta raíz de AppSheet
-  fileName = fileName.replace(/^APP_INSPECCIONES\//i, "");
-
-  console.log("APP:", appName);
-  console.log("FILE:", fileName);
-
-  const url =
-    "https://www.appsheet.com/template/gettablefileurl" +
-    "?appName=" + encodeURIComponent(appName) +
-    "&tableName=" + encodeURIComponent(tableName) +
-    "&fileName=" + encodeURIComponent(fileName);
-
-  console.log("URL PDF:", url);
-
-  window.open(url, "_blank");
 }
   function abrirMaps(lat, lng) {
     if (!lat || !lng) {
