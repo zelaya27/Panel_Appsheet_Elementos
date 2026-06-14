@@ -1278,11 +1278,20 @@ async function abrirPDF(file) {
     alert("Error buscando el PDF en Drive.");
   }
 }
-  function abrirMaps(lat, lng) {
-    if (!lat || !lng) {
-      alert("Este registro no tiene coordenadas.");
-      return;
-    }
+function abrirMaps(lat, lng) {
+
+  if (!lat || !lng) {
+    alert("Este registro no tiene coordenadas.");
+    return;
+  }
+
+  const url =
+    `https://www.google.com/maps?q=${encodeURIComponent(lat)},${encodeURIComponent(lng)}`;
+
+  window.open(url, "_blank");
+}
+
+  
 async function ejecutarElemento(id) {
 
   if (!id) {
