@@ -6,6 +6,7 @@
   <title>Panel Elementos de Red</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="config.js"></script>
 
   <style>
@@ -294,9 +295,9 @@
       background:var(--card);
       border:1px solid var(--border);
       border-radius:16px;
-      min-height:150px;
+      min-height:112px;
       box-shadow:var(--shadow);
-      padding:28px;
+      padding:18px 22px;
       display:flex;
       justify-content:space-between;
       align-items:center;
@@ -317,13 +318,13 @@
     .summary-card.done::before { background:var(--success); }
 
     .summary-icon {
-      width:76px;
-      height:76px;
+      width:58px;
+      height:58px;
       border-radius:50%;
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:34px;
+      font-size:26px;
     }
 
     .pending .summary-icon {
@@ -338,7 +339,7 @@
 
     .summary-info {
       flex:1;
-      padding-left:26px;
+      padding-left:18px;
     }
 
     .summary-info h3 {
@@ -349,7 +350,7 @@
     }
 
     .summary-info .number {
-      font-size:36px;
+      font-size:30px;
       font-weight:900;
       line-height:1;
     }
@@ -367,13 +368,13 @@
       background:var(--card);
       border:1px solid var(--border);
       border-radius:16px;
-      min-height:150px;
+      min-height:112px;
       box-shadow:var(--shadow);
-      padding:26px;
+      padding:18px 22px;
     }
 
     .general-card h3 {
-      margin:0 0 20px;
+      margin:0 0 12px;
       color:var(--primary);
       font-size:16px;
       font-weight:900;
@@ -415,7 +416,7 @@
 
     .filters-grid {
       display:grid;
-      grid-template-columns:1.25fr 1fr 1fr 1fr 1fr 1fr auto auto;
+      grid-template-columns:1.2fr 1fr 1fr 1fr 1fr 1fr 1fr auto auto;
       gap:18px;
       align-items:end;
     }
@@ -535,11 +536,12 @@
 
     .col-id { width:150px; text-align:center; white-space:nowrap; }
     .col-fecha { width:150px; text-align:center; white-space:nowrap; }
-    .col-circuito { width:170px; text-align:center; white-space:nowrap; }
+    .col-circuito { width:150px; text-align:center; white-space:nowrap; }
+    .col-material { width:170px; text-align:center; white-space:nowrap; }
     .col-direccion { min-width:320px; }
     .col-prioridad { width:130px; text-align:center; }
     .col-estado { width:140px; text-align:center; }
-    .col-acciones { width:210px; text-align:center; }
+    .col-acciones { width:330px; text-align:center; }
 
     .badge {
       display:inline-flex;
@@ -686,6 +688,97 @@
   box-shadow: 0 0 0 4px var(--success-soft);
 }
     
+
+
+    .modal-overlay {
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(15,23,42,.38);
+      z-index:300;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+
+    .modal-overlay.show { display:flex; }
+
+    .modal-card {
+      width:720px;
+      max-width:95vw;
+      background:#ffffff;
+      border-radius:18px;
+      box-shadow:0 25px 70px rgba(15,23,42,.28);
+      border:1px solid var(--border);
+      overflow:hidden;
+    }
+
+    .modal-header {
+      height:64px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 22px;
+      border-bottom:1px solid var(--border);
+    }
+
+    .modal-header h3 {
+      margin:0;
+      color:#0b1f4d;
+      font-size:18px;
+      font-weight:900;
+    }
+
+    .modal-close {
+      width:38px;
+      height:38px;
+      border:none;
+      border-radius:10px;
+      background:var(--danger-soft);
+      color:var(--danger);
+      cursor:pointer;
+      font-size:18px;
+    }
+
+    .modal-body { padding:22px; }
+
+    .bar-row {
+      display:grid;
+      grid-template-columns:180px 52px 1fr;
+      gap:12px;
+      align-items:center;
+      margin-bottom:13px;
+      cursor:pointer;
+      padding:6px;
+      border-radius:10px;
+    }
+
+    .bar-row:hover { background:var(--primary-soft); }
+
+    .bar-label { font-weight:800; color:#0b1f4d; font-size:13px; }
+    .bar-count { font-weight:900; color:var(--primary); text-align:right; }
+
+    .bar-bg {
+      height:12px;
+      background:#e5edf8;
+      border-radius:999px;
+      overflow:hidden;
+    }
+
+    .bar-fill {
+      height:100%;
+      background:var(--primary);
+      border-radius:999px;
+      min-width:3px;
+    }
+
+    .modal-note {
+      margin-top:14px;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:700;
+    }
+
   </style>
 </head>
 
@@ -713,6 +806,10 @@
       <div class="nav-item">
         <i class="fas fa-map"></i>
         <span class="nav-text">Mapa</span>
+      </div>
+      <div class="nav-item" onclick="abrirModalPostes()">
+        <i class="fas fa-chart-bar"></i>
+        <span class="nav-text">Postes</span>
       </div>
       <div class="nav-item">
         <i class="fas fa-file-alt"></i>
@@ -836,6 +933,13 @@
         </div>
 
         <div class="filtro-grupo">
+          <label>Material/Altura</label>
+          <select id="filtroMaterial" class="input-filtro" onchange="renderizarTabla()">
+            <option value="ALL">Todos</option>
+          </select>
+        </div>
+
+        <div class="filtro-grupo">
           <label>Estado</label>
           <select id="filtroEstado" class="input-filtro" onchange="renderizarTabla()">
             <option value="ALL">Todos</option>
@@ -879,6 +983,7 @@
               <th class="col-id">ID Elemento</th>
               <th class="col-fecha">Fecha Inspección</th>
               <th class="col-circuito">Circuito</th>
+              <th class="col-material">Material/Altura</th>
               <th class="col-direccion">Dirección</th>
               <th class="col-prioridad">Prioridad</th>
               <th class="col-estado">Estado</th>
@@ -888,7 +993,7 @@
 
           <tbody id="tablaElementos">
             <tr>
-              <td colspan="7" class="mensaje-tabla">Cargando elementos...</td>
+              <td colspan="8" class="mensaje-tabla">Cargando elementos...</td>
             </tr>
           </tbody>
         </table>
@@ -914,6 +1019,20 @@
   </div>
 </div>
 
+
+
+<div class="modal-overlay" id="modalPostes" onclick="cerrarModalPostes(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3><i class="fas fa-chart-bar"></i> Postes pendientes por material / altura</h3>
+      <button class="modal-close" onclick="cerrarModalPostes()">&times;</button>
+    </div>
+    <div class="modal-body" id="contenidoPostes">
+      Cargando...
+    </div>
+  </div>
+</div>
+
 <script>
   let elementosGlobal = [];
   let encabezadosGlobal = [];
@@ -929,6 +1048,7 @@
     CIRCUITO_TXT: "CIRCUITO_TXT",
     DIRECCION: "DIRECCION",
     PRIORIDAD: "PRIORIDAD",
+    MATERIAL: "MATERIAL/ALTURA",
     ESTADO: "ESTADO",
     SECTOR: "SECTOR",
     FILE: "FILE",
@@ -1016,8 +1136,9 @@
   }
 
   function llenarFiltros() {
-    llenarSelect("filtroPrioridad", obtenerUnicos(COL.PRIORIDAD), "Todas");
+    llenarSelect("filtroPrioridad", obtenerUnicosPorSector(COL.PRIORIDAD), "Todas");
     llenarSelect("filtroCircuito", obtenerUnicosCircuito(), "Todos");
+    llenarSelect("filtroMaterial", obtenerUnicosMaterial(), "Todos");
   }
 
   function llenarSelect(idSelect, valores, textoDefault) {
@@ -1034,10 +1155,14 @@
     });
   }
 
-  function obtenerUnicos(nombreColumna) {
+  function obtenerUnicosPorSector(nombreColumna) {
     const set = new Set();
+    const sectorLogin = String(sessionStorage.getItem("sector") || "").trim().toUpperCase();
 
     elementosGlobal.forEach(reg => {
+      const regSector = obtenerValor(reg, COL.SECTOR).trim().toUpperCase();
+      if (sectorLogin && regSector !== sectorLogin) return;
+
       const valor = obtenerValor(reg, nombreColumna);
       if (valor) set.add(valor);
     });
@@ -1051,9 +1176,28 @@
 
   function obtenerUnicosCircuito() {
     const set = new Set();
+    const sectorLogin = String(sessionStorage.getItem("sector") || "").trim().toUpperCase();
 
     elementosGlobal.forEach(reg => {
+      const regSector = obtenerValor(reg, COL.SECTOR).trim().toUpperCase();
+      if (sectorLogin && regSector !== sectorLogin) return;
+
       const valor = obtenerCircuitoMostrar(reg);
+      if (valor) set.add(valor);
+    });
+
+    return Array.from(set).sort();
+  }
+
+  function obtenerUnicosMaterial() {
+    const set = new Set();
+    const sectorLogin = String(sessionStorage.getItem("sector") || "").trim().toUpperCase();
+
+    elementosGlobal.forEach(reg => {
+      const regSector = obtenerValor(reg, COL.SECTOR).trim().toUpperCase();
+      if (sectorLogin && regSector !== sectorLogin) return;
+
+      const valor = obtenerValor(reg, COL.MATERIAL);
       if (valor) set.add(valor);
     });
 
@@ -1064,6 +1208,7 @@
     const estado = document.getElementById("filtroEstado").value;
     const prioridad = document.getElementById("filtroPrioridad").value;
     const circuito = document.getElementById("filtroCircuito").value;
+    const material = document.getElementById("filtroMaterial").value;
     const idElemento = document.getElementById("filtroIdElemento").value.trim().toUpperCase();
     const fechaDesde = document.getElementById("fechaDesde").value;
     const fechaHasta = document.getElementById("fechaHasta").value;
@@ -1074,6 +1219,7 @@
       const regSector = obtenerValor(reg, COL.SECTOR).toUpperCase();
       const regEstado = obtenerValor(reg, COL.ESTADO).toUpperCase();
       const regPrioridad = obtenerValor(reg, COL.PRIORIDAD);
+      const regMaterial = obtenerValor(reg, COL.MATERIAL);
       const regCircuito = obtenerCircuitoMostrar(reg);
       const regId = obtenerValor(reg, COL.ID_ELEMENTO).toUpperCase();
 
@@ -1087,6 +1233,7 @@
       if (estado !== "ALL" && regEstado !== estado) return false;
       if (prioridad !== "ALL" && regPrioridad !== prioridad) return false;
       if (circuito !== "ALL" && regCircuito !== circuito) return false;
+      if (material !== "ALL" && regMaterial !== material) return false;
       if (idElemento && !regId.includes(idElemento)) return false;
       if (fechaDesde && regFecha && regFecha < fechaDesde) return false;
       if (fechaHasta && regFecha && regFecha > fechaHasta) return false;
@@ -1112,7 +1259,7 @@
     registrosFiltradosGlobal = registros;
 
     if (registros.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" class="mensaje-tabla">No hay registros para mostrar.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8" class="mensaje-tabla">No hay registros para mostrar.</td></tr>`;
       actualizarFooter(0, 0, 0);
       return;
     }
@@ -1128,6 +1275,7 @@
       const fechaBase = obtenerValor(reg, COL.FECHA_REGISTRO) || obtenerValor(reg, COL.FECHA);
       const fecha = formatearFecha(fechaBase);
       const circuito = obtenerCircuitoMostrar(reg);
+      const material = obtenerValor(reg, COL.MATERIAL);
       const direccion = obtenerValor(reg, COL.DIRECCION);
       const prioridad = obtenerValor(reg, COL.PRIORIDAD);
       const estado = obtenerValor(reg, COL.ESTADO);
@@ -1141,6 +1289,7 @@
         <td class="col-id">${escaparHtml(id)}</td>
         <td class="col-fecha">${escaparHtml(fecha)}</td>
         <td class="col-circuito">${escaparHtml(circuito)}</td>
+        <td class="col-material">${escaparHtml(material)}</td>
         <td class="col-direccion">${escaparHtml(direccion)}</td>
         <td class="col-prioridad">${badgePrioridad(prioridad)}</td>
         <td class="col-estado">${badgeEstado(estado)}</td>
@@ -1306,8 +1455,11 @@ async function ejecutarElemento(id) {
     });
 
     if (data.ok) {
+      const reg = elementosGlobal.find(r => obtenerValor(r, COL.ID_ELEMENTO) === id);
+      if (reg && reg.obj) reg.obj[COL.ESTADO] = "EJECUTADO";
+      actualizarResumen();
+      renderizarTabla(false);
       alert("Elemento ejecutado correctamente.");
-      await cargarElementos();
     } else {
       alert(data.error || "No se pudo ejecutar el elemento.");
     }
@@ -1321,6 +1473,7 @@ async function ejecutarElemento(id) {
     document.getElementById("filtroEstado").value = "ALL";
     document.getElementById("filtroPrioridad").value = "ALL";
     document.getElementById("filtroCircuito").value = "ALL";
+    document.getElementById("filtroMaterial").value = "ALL";
     document.getElementById("filtroIdElemento").value = "";
     document.getElementById("fechaDesde").value = "";
     document.getElementById("fechaHasta").value = "";
@@ -1338,38 +1491,91 @@ async function ejecutarElemento(id) {
       return;
     }
 
+    if (typeof XLSX === "undefined") {
+      alert("No se cargó la librería de Excel. Revisa tu conexión o el CDN XLSX.");
+      return;
+    }
+
     const encabezados = encabezadosGlobal.length
       ? encabezadosGlobal
       : Object.keys(registros[0].obj || {});
 
-    let csv = encabezados.map(h => `"${String(h).replace(/"/g, '""')}"`).join(",") + "\n";
-
-    registros.forEach(reg => {
-      const fila = encabezados.map(h => {
-        let valor = obtenerValor(reg, h);
-        return `"${String(valor || "").replace(/"/g, '""')}"`;
+    const filas = registros.map(reg => {
+      const fila = {};
+      encabezados.forEach(h => {
+        fila[h] = obtenerValor(reg, h);
       });
-
-      csv += fila.join(",") + "\n";
+      return fila;
     });
 
-    const blob = new Blob(["\uFEFF" + csv], {
-      type: "text/csv;charset=utf-8;"
-    });
+    const ws = XLSX.utils.json_to_sheet(filas, { header: encabezados });
+    ws["!cols"] = encabezados.map(h => ({ wch: Math.min(Math.max(String(h).length + 4, 14), 35) }));
 
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "ELEMENTOS_DE_RED");
 
     const sector = sessionStorage.getItem("sector") || "SECTOR";
     const fecha = new Date().toISOString().substring(0, 10);
 
-    a.href = url;
-    a.download = `Elementos_Red_${sector}_${fecha}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    XLSX.writeFile(wb, `Elementos_Red_${sector}_${fecha}.xlsx`);
+  }
 
-    URL.revokeObjectURL(url);
+
+  function abrirModalPostes() {
+    const contenedor = document.getElementById("contenidoPostes");
+    const modal = document.getElementById("modalPostes");
+
+    const datos = obtenerPendientesPorMaterial();
+
+    if (!datos.length) {
+      contenedor.innerHTML = '<div class="mensaje-tabla">No hay postes pendientes para mostrar.</div>';
+    } else {
+      const max = Math.max(...datos.map(d => d.total));
+      contenedor.innerHTML = datos.map(d => {
+        const ancho = max ? Math.round((d.total / max) * 100) : 0;
+        return `
+          <div class="bar-row" onclick="aplicarFiltroMaterial('${escaparAtributo(d.material)}')">
+            <div class="bar-label">${escaparHtml(d.material)}</div>
+            <div class="bar-count">${d.total}</div>
+            <div class="bar-bg"><div class="bar-fill" style="width:${ancho}%"></div></div>
+          </div>
+        `;
+      }).join("") + '<div class="modal-note">Solo se muestran registros PENDIENTES del sector actual. Clic en una barra para filtrar.</div>';
+    }
+
+    modal.classList.add("show");
+  }
+
+  function cerrarModalPostes(event) {
+    if (event && event.target.id !== "modalPostes") return;
+    document.getElementById("modalPostes").classList.remove("show");
+  }
+
+  function obtenerPendientesPorMaterial() {
+    const sectorLogin = String(sessionStorage.getItem("sector") || "").trim().toUpperCase();
+    const mapa = {};
+
+    elementosGlobal.forEach(reg => {
+      const regSector = obtenerValor(reg, COL.SECTOR).toUpperCase();
+      const estado = obtenerValor(reg, COL.ESTADO).toUpperCase();
+      const material = obtenerValor(reg, COL.MATERIAL) || "SIN MATERIAL";
+
+      if (sectorLogin && regSector !== sectorLogin) return;
+      if (estado !== "PENDIENTE") return;
+
+      mapa[material] = (mapa[material] || 0) + 1;
+    });
+
+    return Object.keys(mapa)
+      .map(material => ({ material, total: mapa[material] }))
+      .sort((a, b) => b.total - a.total);
+  }
+
+  function aplicarFiltroMaterial(material) {
+    cerrarModalPostes();
+    document.getElementById("filtroEstado").value = "PENDIENTE";
+    document.getElementById("filtroMaterial").value = material;
+    renderizarTabla();
   }
 
   function cerrarSesion() {
@@ -1381,7 +1587,7 @@ async function ejecutarElemento(id) {
     const tbody = document.getElementById("tablaElementos");
     tbody.innerHTML = `
       <tr>
-        <td colspan="7" class="mensaje-tabla ${error ? "mensaje-error" : ""}">
+        <td colspan="8" class="mensaje-tabla ${error ? "mensaje-error" : ""}">
           ${escaparHtml(mensaje)}
         </td>
       </tr>
