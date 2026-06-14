@@ -1134,13 +1134,20 @@
             <button class="btn-icon btn-maps" onclick="abrirMaps('${escaparAtributo(lat)}','${escaparAtributo(lng)}')">
               <i class="fas fa-map-marker-alt"></i> MAPS
             </button>
+
+            ${
+              String(estado).trim().toUpperCase() === "EJECUTADO"
+                ? `<span class="estado-ok" title="Elemento ejecutado"></span>`
+                : `<button class="btn-icon btn-ejecutar" onclick="ejecutarElemento('${escaparAtributo(id)}')">
+                    <i class="fas fa-check"></i> EJECUTAR
+                   </button>`
+            }
           </div>
         </td>
       `;
 
       tbody.appendChild(tr);
     });
-
     actualizarFooter(registros.length, inicio + 1, Math.min(fin, registros.length));
   }
 
