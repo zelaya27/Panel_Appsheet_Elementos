@@ -13,24 +13,26 @@
       --primary:#0b5ed7;
       --primary-dark:#084298;
       --primary-soft:#eaf2ff;
+      --primary-hover:#d6e7ff;
       --bg:#f5f8fc;
       --card:#ffffff;
       --text:#0f172a;
       --muted:#64748b;
       --border:#dbe3ef;
       --danger:#ef4444;
+      --danger-dark:#dc2626;
       --danger-soft:#ffe4e6;
       --success:#16a34a;
       --success-soft:#dcfce7;
       --warning:#f59e0b;
       --warning-soft:#fef3c7;
+      --orange-hover:#fed7aa;
+      --orange-hover-text:#9a3412;
       --shadow:0 12px 35px rgba(15,23,42,.08);
       --shadow-small:0 6px 18px rgba(15,23,42,.08);
     }
 
-    * {
-      box-sizing:border-box;
-    }
+    * { box-sizing:border-box; }
 
     body {
       margin:0;
@@ -56,13 +58,9 @@
       justify-content:space-between;
     }
 
-    .sidebar.collapsed {
-      width:72px;
-    }
+    .sidebar.collapsed { width:72px; }
 
-    .sidebar-top {
-      padding:22px 16px;
-    }
+    .sidebar-top { padding:22px 16px; }
 
     .sidebar-logo {
       display:flex;
@@ -72,10 +70,7 @@
       border-bottom:1px solid var(--border);
     }
 
-    .sidebar-logo img {
-      width:52px;
-      height:auto;
-    }
+    .sidebar-logo img { width:52px; height:auto; }
 
     .sidebar-logo-text {
       font-size:24px;
@@ -129,9 +124,7 @@
       font-size:18px;
     }
 
-    .sidebar-bottom {
-      padding:16px;
-    }
+    .sidebar-bottom { padding:16px; }
 
     .sidebar-user {
       border:1px solid var(--border);
@@ -179,9 +172,7 @@
       transition:.25s ease;
     }
 
-    .main.expanded {
-      margin-left:72px;
-    }
+    .main.expanded { margin-left:72px; }
 
     header {
       height:92px;
@@ -322,13 +313,8 @@
       width:5px;
     }
 
-    .summary-card.pending::before {
-      background:var(--danger);
-    }
-
-    .summary-card.done::before {
-      background:var(--success);
-    }
+    .summary-card.pending::before { background:var(--danger); }
+    .summary-card.done::before { background:var(--success); }
 
     .summary-icon {
       width:76px;
@@ -368,13 +354,8 @@
       line-height:1;
     }
 
-    .pending .number {
-      color:var(--danger);
-    }
-
-    .done .number {
-      color:var(--success);
-    }
+    .pending .number { color:var(--danger); }
+    .done .number { color:var(--success); }
 
     .summary-info p {
       margin:8px 0 0;
@@ -413,9 +394,7 @@
       margin-right:10px;
     }
 
-    .general-row strong {
-      color:#0b1f4d;
-    }
+    .general-row strong { color:#0b1f4d; }
 
     .panel-box {
       background:var(--card);
@@ -425,9 +404,7 @@
       margin-bottom:24px;
     }
 
-    .filters {
-      padding:26px;
-    }
+    .filters { padding:26px; }
 
     .filters h3 {
       margin:0 0 22px;
@@ -472,13 +449,9 @@
       box-shadow:0 0 0 4px rgba(11,94,215,.10);
     }
 
-    .search-wrap {
-      position:relative;
-    }
+    .search-wrap { position:relative; }
 
-    .search-wrap .input-filtro {
-      padding-right:42px;
-    }
+    .search-wrap .input-filtro { padding-right:42px; }
 
     .search-wrap i {
       position:absolute;
@@ -518,7 +491,8 @@
     }
 
     .btn-exportar:hover {
-      background:#15803d;
+      background:var(--orange-hover);
+      color:var(--orange-hover-text);
     }
 
     .table-panel {
@@ -526,9 +500,7 @@
       overflow:hidden;
     }
 
-    .table-responsive {
-      overflow-x:auto;
-    }
+    .table-responsive { overflow-x:auto; }
 
     table {
       width:100%;
@@ -558,7 +530,7 @@
     }
 
     tbody tr:hover {
-      background:#f8fbff;
+      background:var(--primary-hover);
     }
 
     .col-id { width:150px; text-align:center; white-space:nowrap; }
@@ -579,6 +551,11 @@
       font-size:12px;
       font-weight:900;
       text-transform:uppercase;
+    }
+
+    .badge-urgente {
+      background:var(--danger-dark);
+      color:#ffffff;
     }
 
     .badge-alta {
@@ -629,20 +606,19 @@
       font-weight:900;
       color:#0f172a;
       box-shadow:0 4px 10px rgba(15,23,42,.05);
+      transition:.18s ease;
     }
 
     .btn-icon:hover {
       transform:translateY(-1px);
       box-shadow:0 8px 16px rgba(15,23,42,.09);
+      background:var(--orange-hover);
+      color:var(--orange-hover-text);
+      border-color:#fdba74;
     }
 
-    .btn-pdf i {
-      color:var(--danger);
-    }
-
-    .btn-maps i {
-      color:var(--primary);
-    }
+    .btn-pdf i { color:var(--danger); }
+    .btn-maps i { color:var(--primary); }
 
     .mensaje-tabla {
       text-align:center;
@@ -651,9 +627,7 @@
       font-weight:800;
     }
 
-    .mensaje-error {
-      color:var(--danger);
-    }
+    .mensaje-error { color:var(--danger); }
 
     .footer-table {
       display:flex;
@@ -783,7 +757,7 @@
     <div class="cards-row">
       <div class="summary-card pending">
         <div class="summary-icon">
-          <i class="fas fa-broadcast-tower"></i>
+          <i class="fas fa-bolt"></i>
         </div>
         <div class="summary-info">
           <h3>PENDIENTES</h3>
@@ -807,12 +781,12 @@
         <h3>INFORMACIÓN GENERAL</h3>
 
         <div class="general-row">
-          <span><i class="fas fa-user"></i> Total Elementos</span>
+          <span><i class="fas fa-list"></i> Total Elementos</span>
           <strong id="totalElementos">0</strong>
         </div>
 
         <div class="general-row">
-          <span><i class="fas fa-map"></i> Circuitos</span>
+          <span><i class="fas fa-route"></i> Circuitos</span>
           <strong id="totalCircuitos">0</strong>
         </div>
 
@@ -923,6 +897,7 @@
 
 <script>
   let elementosGlobal = [];
+  let encabezadosGlobal = [];
   let registrosFiltradosGlobal = [];
   let paginaActual = 1;
   const registrosPorPagina = 10;
@@ -932,9 +907,9 @@
     FECHA_REGISTRO: "FECHA_HORA_REGISTRO",
     FECHA: "FECHA",
     CIRCUITO: "CIRCUITO",
+    CIRCUITO_TXT: "CIRCUITO_TXT",
     DIRECCION: "DIRECCION",
     PRIORIDAD: "PRIORIDAD",
-    MATERIAL: "MATERIAL/ALTURA",
     ESTADO: "ESTADO",
     SECTOR: "SECTOR",
     FILE: "FILE",
@@ -967,17 +942,13 @@
   }
 
   function toggleSidebar() {
-    const sidebar = document.getElementById("sidebar");
-    const main = document.getElementById("main");
-
-    sidebar.classList.toggle("collapsed");
-    main.classList.toggle("expanded");
+    document.getElementById("sidebar").classList.toggle("collapsed");
+    document.getElementById("main").classList.toggle("expanded");
   }
 
   function apiJSONP(params) {
     return new Promise((resolve, reject) => {
       const callbackName = "jsonp_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
-
       params.callback = callbackName;
 
       const query = new URLSearchParams(params).toString();
@@ -1014,6 +985,7 @@
       }
 
       elementosGlobal = data.registros || [];
+      encabezadosGlobal = data.encabezados || [];
 
       llenarFiltros();
       actualizarResumen();
@@ -1054,11 +1026,15 @@
     return Array.from(set).sort();
   }
 
+  function obtenerCircuitoMostrar(reg) {
+    return obtenerValor(reg, COL.CIRCUITO_TXT) || obtenerValor(reg, COL.CIRCUITO);
+  }
+
   function obtenerUnicosCircuito() {
     const set = new Set();
 
     elementosGlobal.forEach(reg => {
-      const valor = reg.circuitoMostrar || obtenerValor(reg, COL.CIRCUITO);
+      const valor = obtenerCircuitoMostrar(reg);
       if (valor) set.add(valor);
     });
 
@@ -1079,7 +1055,7 @@
       const regSector = obtenerValor(reg, COL.SECTOR).toUpperCase();
       const regEstado = obtenerValor(reg, COL.ESTADO).toUpperCase();
       const regPrioridad = obtenerValor(reg, COL.PRIORIDAD);
-      const regCircuito = reg.circuitoMostrar || obtenerValor(reg, COL.CIRCUITO);
+      const regCircuito = obtenerCircuitoMostrar(reg);
       const regId = obtenerValor(reg, COL.ID_ELEMENTO).toUpperCase();
 
       const fechaBase =
@@ -1111,9 +1087,7 @@
   function renderizarTabla(resetPagina = true) {
     const tbody = document.getElementById("tablaElementos");
 
-    if (resetPagina) {
-      paginaActual = 1;
-    }
+    if (resetPagina) paginaActual = 1;
 
     const registros = obtenerRegistrosFiltrados();
     registrosFiltradosGlobal = registros;
@@ -1134,7 +1108,7 @@
       const id = obtenerValor(reg, COL.ID_ELEMENTO);
       const fechaBase = obtenerValor(reg, COL.FECHA_REGISTRO) || obtenerValor(reg, COL.FECHA);
       const fecha = formatearFecha(fechaBase);
-      const circuito = reg.circuitoMostrar || obtenerValor(reg, COL.CIRCUITO);
+      const circuito = obtenerCircuitoMostrar(reg);
       const direccion = obtenerValor(reg, COL.DIRECCION);
       const prioridad = obtenerValor(reg, COL.PRIORIDAD);
       const estado = obtenerValor(reg, COL.ESTADO);
@@ -1174,11 +1148,9 @@
     const info = document.getElementById("infoRegistros");
     const totalPaginas = Math.max(1, Math.ceil(total / registrosPorPagina));
 
-    if (total === 0) {
-      info.textContent = "Mostrando 0 elementos";
-    } else {
-      info.textContent = `Mostrando ${inicio} a ${fin} de ${total} elementos`;
-    }
+    info.textContent = total === 0
+      ? "Mostrando 0 elementos"
+      : `Mostrando ${inicio} a ${fin} de ${total} elementos`;
 
     document.getElementById("paginaActual").textContent = paginaActual;
     document.getElementById("btnPrev").disabled = paginaActual <= 1;
@@ -1206,7 +1178,7 @@
     elementosGlobal.forEach(reg => {
       const regSector = obtenerValor(reg, COL.SECTOR).toUpperCase();
       const estado = obtenerValor(reg, COL.ESTADO).toUpperCase();
-      const circuito = reg.circuitoMostrar || obtenerValor(reg, COL.CIRCUITO);
+      const circuito = obtenerCircuitoMostrar(reg);
 
       if (sectorLogin && regSector && regSector !== sectorLogin) return;
 
@@ -1235,7 +1207,8 @@
     const p = String(prioridad || "").trim().toUpperCase();
     let clase = "";
 
-    if (p === "ALTA") clase = "badge-alta";
+    if (p === "URGENTE") clase = "badge-urgente";
+    else if (p === "ALTA") clase = "badge-alta";
     else if (p === "MEDIA") clase = "badge-media";
     else if (p === "BAJA") clase = "badge-baja";
 
@@ -1252,7 +1225,7 @@
     return `<span class="badge ${clase}">${escaparHtml(estado || "")}</span>`;
   }
 
-  async function abrirPDF(file) {
+  function abrirPDF(file) {
     if (!file) {
       alert("Este registro no tiene PDF.");
       return;
@@ -1263,21 +1236,21 @@
       return;
     }
 
-    try {
-      const data = await apiJSONP({
-        action: "obtenerUrlArchivo",
-        ruta: file
-      });
+    const appName = CONFIG.APPSHEET_APP_NAME || "";
+    const tableName = "ELEMENTOS_DE_RED";
 
-      if (data.ok && data.url) {
-        window.open(data.url, "_blank");
-      } else {
-        alert(data.error || "No se encontró el PDF en Drive.");
-      }
-
-    } catch (error) {
-      alert("Error buscando el PDF.");
+    if (!appName) {
+      alert("Falta configurar CONFIG.APPSHEET_APP_NAME en config.js para abrir archivos AppSheet.");
+      return;
     }
+
+    const url =
+      "https://www.appsheet.com/template/gettablefileurl" +
+      "?appName=" + encodeURIComponent(appName) +
+      "&tableName=" + encodeURIComponent(tableName) +
+      "&fileName=" + encodeURIComponent(file);
+
+    window.open(url, "_blank");
   }
 
   function abrirMaps(lat, lng) {
@@ -1311,36 +1284,19 @@
       return;
     }
 
-    const encabezados = [
-      "ID_ELEMENTO",
-      "FECHA",
-      "CIRCUITO",
-      "DIRECCION",
-      "PRIORIDAD",
-      "ESTADO",
-      "LATITUDE",
-      "LONGITUDE",
-      "PDF"
-    ];
+    const encabezados = encabezadosGlobal.length
+      ? encabezadosGlobal
+      : Object.keys(registros[0].obj || {});
 
-    const filas = registros.map(reg => {
-      return [
-        obtenerValor(reg, COL.ID_ELEMENTO),
-        formatearFecha(obtenerValor(reg, COL.FECHA_REGISTRO) || obtenerValor(reg, COL.FECHA)),
-        reg.circuitoMostrar || obtenerValor(reg, COL.CIRCUITO),
-        obtenerValor(reg, COL.DIRECCION),
-        obtenerValor(reg, COL.PRIORIDAD),
-        obtenerValor(reg, COL.ESTADO),
-        obtenerValor(reg, COL.LATITUDE),
-        obtenerValor(reg, COL.LONGITUDE),
-        obtenerValor(reg, COL.FILE)
-      ];
-    });
+    let csv = encabezados.map(h => `"${String(h).replace(/"/g, '""')}"`).join(",") + "\n";
 
-    let csv = encabezados.join(",") + "\n";
+    registros.forEach(reg => {
+      const fila = encabezados.map(h => {
+        let valor = obtenerValor(reg, h);
+        return `"${String(valor || "").replace(/"/g, '""')}"`;
+      });
 
-    filas.forEach(fila => {
-      csv += fila.map(valor => `"${String(valor || "").replace(/"/g, '""')}"`).join(",") + "\n";
+      csv += fila.join(",") + "\n";
     });
 
     const blob = new Blob(["\uFEFF" + csv], {
