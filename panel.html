@@ -1123,7 +1123,17 @@
         return;
       }
 
-      elementosGlobal = data.registros || [];
+      const sectorLogin = String(sessionStorage.getItem("sector") || "")
+  .trim()
+  .toUpperCase();
+
+elementosGlobal = (data.registros || []).filter(reg => {
+  const sectorRegistro = obtenerValor(reg, COL.SECTOR)
+    .trim()
+    .toUpperCase();
+
+  return !sectorLogin || sectorRegistro === sectorLogin;
+});
       encabezadosGlobal = data.encabezados || [];
 
       llenarFiltros();
