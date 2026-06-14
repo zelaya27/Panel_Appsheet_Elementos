@@ -667,6 +667,25 @@
       opacity:.45;
       cursor:not-allowed;
     }
+  .btn-ejecutar i {
+  color: var(--success);
+}
+
+.btn-ejecutar:hover {
+  background: var(--orange-hover);
+  color: var(--orange-hover-text);
+  border-color: #fdba74;
+}
+
+.estado-ok {
+  width: 15px;
+  height: 15px;
+  background: var(--success);
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 0 4px var(--success-soft);
+}
+    
   </style>
 </head>
 
@@ -1264,7 +1283,16 @@ async function abrirPDF(file) {
       alert("Este registro no tiene coordenadas.");
       return;
     }
+async function ejecutarElemento(id) {
 
+  if (!id) {
+    alert("No se recibió ID del elemento.");
+    return;
+  }
+
+  if (!confirm("¿Desea marcar este elemento como EJECUTADO?")) {
+    return;
+ 
     const url = `https://www.google.com/maps?q=${encodeURIComponent(lat)},${encodeURIComponent(lng)}`;
     window.open(url, "_blank");
   }
