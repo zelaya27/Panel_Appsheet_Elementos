@@ -1,0 +1,6 @@
+
+body{margin:0;font-family:Arial,sans-serif}
+.app-container{display:flex;height:100vh}
+.sidebar{width:70px;background:#1f2937;color:#fff}
+.contenido{flex:1}
+#vistaMapa{height:100vh}
