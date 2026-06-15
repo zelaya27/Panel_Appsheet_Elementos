@@ -6,7 +6,9 @@
   <title>Panel Elementos de Red</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="config.js"></script>
 
   <style>
@@ -779,6 +781,255 @@
       font-weight:700;
     }
 
+
+    .map-panel {
+      display:none;
+      overflow:hidden;
+    }
+
+    .map-panel.show { display:block; }
+
+    .map-toolbar {
+      padding:18px 22px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      background:#ffffff;
+    }
+
+    .map-toolbar-title h3 {
+      margin:0;
+      font-size:18px;
+      font-weight:900;
+      color:#0b1f4d;
+    }
+
+    .map-toolbar-title p {
+      margin:4px 0 0;
+      color:var(--muted);
+      font-size:13px;
+      font-weight:700;
+    }
+
+    .map-legend {
+      display:flex;
+      gap:14px;
+      align-items:center;
+      flex-wrap:wrap;
+      font-size:13px;
+      font-weight:900;
+      color:#0b1f4d;
+    }
+
+    .legend-dot {
+      width:12px;
+      height:12px;
+      border-radius:50%;
+      display:inline-block;
+      margin-right:6px;
+      box-shadow:0 0 0 4px rgba(15,23,42,.08);
+    }
+
+    .dot-pendiente { background:var(--danger); }
+    .dot-ejecutado { background:var(--success); }
+    .dot-otro { background:var(--warning); }
+
+    .map-layout {
+      display:grid;
+      grid-template-columns:1fr 420px;
+      min-height:640px;
+    }
+
+    #mapaElementos {
+      width:100%;
+      min-height:640px;
+      background:#e5edf8;
+      z-index:1;
+    }
+
+    .map-side-card {
+      border-left:1px solid var(--border);
+      background:#f8fbff;
+      padding:18px;
+      overflow:auto;
+      max-height:640px;
+    }
+
+    .element-detail-card {
+      background:#ffffff;
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:var(--shadow-small);
+      overflow:hidden;
+    }
+
+    .element-detail-header {
+      padding:16px 18px;
+      background:linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color:#ffffff;
+    }
+
+    .element-detail-header h3 {
+      margin:0;
+      font-size:18px;
+      font-weight:900;
+    }
+
+    .element-detail-header small {
+      display:block;
+      margin-top:4px;
+      opacity:.9;
+      font-weight:700;
+    }
+
+    .detail-section {
+      padding:16px 18px;
+      border-bottom:1px solid #eef2f7;
+    }
+
+    .detail-row {
+      display:grid;
+      grid-template-columns:110px 1fr;
+      gap:10px;
+      margin-bottom:11px;
+      font-size:13px;
+    }
+
+    .detail-row:last-child { margin-bottom:0; }
+
+    .detail-row span {
+      color:var(--muted);
+      font-weight:900;
+    }
+
+    .detail-row strong {
+      color:#0b1f4d;
+      font-weight:900;
+      line-height:1.35;
+    }
+
+    .photo-grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .photo-thumb {
+      height:92px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:#eef2f7;
+      overflow:hidden;
+      cursor:pointer;
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--muted);
+      font-size:11px;
+      font-weight:900;
+      text-align:center;
+    }
+
+    .photo-thumb img {
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .photo-thumb label {
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:0;
+      background:rgba(15,23,42,.72);
+      color:white;
+      padding:4px 5px;
+      font-size:10px;
+      font-weight:900;
+    }
+
+    .photo-empty {
+      border-style:dashed;
+      background:#f8fafc;
+      cursor:default;
+    }
+
+    .detail-actions {
+      padding:16px 18px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .map-popup-title {
+      font-weight:900;
+      color:#0b1f4d;
+      margin-bottom:6px;
+      font-size:14px;
+    }
+
+    .map-popup-text {
+      font-size:12px;
+      color:#334155;
+      margin-bottom:8px;
+    }
+
+    .map-popup-btn {
+      border:none;
+      background:var(--primary);
+      color:white;
+      border-radius:8px;
+      padding:7px 10px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .custom-marker {
+      width:20px;
+      height:20px;
+      border-radius:50%;
+      border:3px solid #ffffff;
+      box-shadow:0 3px 10px rgba(15,23,42,.35);
+    }
+
+    .marker-pendiente { background:var(--danger); }
+    .marker-ejecutado { background:var(--success); }
+    .marker-otro { background:var(--warning); }
+
+    .image-modal-card {
+      width:900px;
+      max-width:96vw;
+      background:#ffffff;
+      border-radius:18px;
+      box-shadow:0 25px 70px rgba(15,23,42,.32);
+      border:1px solid var(--border);
+      overflow:hidden;
+    }
+
+    .image-modal-body {
+      padding:16px;
+      background:#0f172a;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:420px;
+    }
+
+    .image-modal-body img {
+      max-width:100%;
+      max-height:78vh;
+      border-radius:10px;
+      background:white;
+    }
+
+    @media (max-width:1300px) {
+      .map-layout { grid-template-columns:1fr 360px; }
+    }
+
   </style>
 </head>
 
@@ -795,15 +1046,15 @@
     </div>
 
     <nav class="nav">
-      <div class="nav-item active">
+      <div class="nav-item active" id="navDashboard" onclick="mostrarVistaTabla()">
         <i class="fas fa-home"></i>
         <span class="nav-text">Dashboard</span>
       </div>
-      <div class="nav-item">
+      <div class="nav-item" id="navElementos" onclick="mostrarVistaTabla()">
         <i class="fas fa-bolt"></i>
         <span class="nav-text">Elementos</span>
       </div>
-      <div class="nav-item">
+      <div class="nav-item" id="navMapa" onclick="mostrarVistaMapa()">
         <i class="fas fa-map"></i>
         <span class="nav-text">Mapa</span>
       </div>
@@ -913,7 +1164,7 @@
       </div>
     </div>
 
-    <div class="panel-box filters">
+    <div class="panel-box filters" id="panelFiltros">
       <h3>FILTROS DE BÚSQUEDA</h3>
 
       <div class="filters-grid">
@@ -975,7 +1226,7 @@
       </div>
     </div>
 
-    <div class="panel-box table-panel">
+    <div class="panel-box table-panel" id="panelTabla">
       <div class="table-responsive">
         <table>
           <thead>
@@ -1016,6 +1267,36 @@
       </div>
     </div>
 
+
+    <div class="panel-box map-panel" id="panelMapa">
+      <div class="map-toolbar">
+        <div class="map-toolbar-title">
+          <h3><i class="fas fa-map"></i> Dashboard GPS de elementos</h3>
+          <p id="mapaResumenTexto">Mapa del sector con elementos filtrados</p>
+        </div>
+        <div class="map-legend">
+          <span><i class="legend-dot dot-pendiente"></i>Pendiente</span>
+          <span><i class="legend-dot dot-ejecutado"></i>Ejecutado</span>
+          <span><i class="legend-dot dot-otro"></i>Otro</span>
+        </div>
+      </div>
+
+      <div class="map-layout">
+        <div id="mapaElementos"></div>
+        <div class="map-side-card" id="detalleMapa">
+          <div class="element-detail-card">
+            <div class="element-detail-header">
+              <h3>Seleccione un punto</h3>
+              <small>Al hacer clic en el mapa verá datos y fotos del elemento.</small>
+            </div>
+            <div class="detail-section">
+              <div class="mensaje-tabla">No hay elemento seleccionado.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1033,12 +1314,28 @@
   </div>
 </div>
 
+
+<div class="modal-overlay" id="modalImagen" onclick="cerrarImagenGrande(event)">
+  <div class="image-modal-card" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="tituloImagenGrande"><i class="fas fa-image"></i> Foto del elemento</h3>
+      <button class="modal-close" onclick="cerrarImagenGrande()">&times;</button>
+    </div>
+    <div class="image-modal-body">
+      <img id="imagenGrande" src="" alt="Foto del elemento">
+    </div>
+  </div>
+</div>
+
 <script>
   let elementosGlobal = [];
   let encabezadosGlobal = [];
   let registrosFiltradosGlobal = [];
   let paginaActual = 1;
   const registrosPorPagina = 10;
+  let mapaElementos = null;
+  let marcadoresMapa = [];
+  let vistaActual = "tabla";
 
   const COL = {
     ID_ELEMENTO: "ID_ELEMENTO",
@@ -1052,6 +1349,13 @@
     ESTADO: "ESTADO",
     SECTOR: "SECTOR",
     FILE: "FILE",
+    FOTO_DANO: "FOTO_DAÑO",
+    FOTO_DANO_2: "FOTO_DAÑO_2",
+    FOTO_PANORAMICA: "FOTO_PANORAMICA",
+    FOTO_ESTRUCTURA: "FOTO_ESTRUCTURA",
+    FOTO_CAMBIO_1: "FOTO_CAMBIO_1",
+    FOTO_CAMBIO_2: "FOTO_CAMBIO_2",
+    FOTO_CAMBIO_3: "FOTO_CAMBIO_3",
     LATITUDE: "LATITUDE",
     LONGITUDE: "LONGITUDE"
   };
@@ -1267,6 +1571,7 @@ elementosGlobal = (data.registros || []).filter(reg => {
 
     const registros = obtenerRegistrosFiltrados();
     registrosFiltradosGlobal = registros;
+    if (vistaActual === "mapa") renderizarMapa();
 
     if (registros.length === 0) {
       tbody.innerHTML = `<tr><td colspan="8" class="mensaje-tabla">No hay registros para mostrar.</td></tr>`;
@@ -1469,6 +1774,10 @@ async function ejecutarElemento(id) {
       if (reg && reg.obj) reg.obj[COL.ESTADO] = "EJECUTADO";
       actualizarResumen();
       renderizarTabla(false);
+      if (vistaActual === "mapa") {
+        renderizarMapa();
+        seleccionarElementoMapa(id);
+      }
       alert("Elemento ejecutado correctamente.");
     } else {
       alert(data.error || "No se pudo ejecutar el elemento.");
@@ -1586,6 +1895,208 @@ async function ejecutarElemento(id) {
     document.getElementById("filtroEstado").value = "PENDIENTE";
     document.getElementById("filtroMaterial").value = material;
     renderizarTabla();
+  }
+
+
+  function mostrarVistaTabla() {
+    vistaActual = "tabla";
+    document.getElementById("panelFiltros").style.display = "block";
+    document.getElementById("panelTabla").style.display = "block";
+    document.getElementById("panelMapa").classList.remove("show");
+    activarNav("navDashboard");
+  }
+
+  function mostrarVistaMapa() {
+    vistaActual = "mapa";
+    document.getElementById("panelFiltros").style.display = "block";
+    document.getElementById("panelTabla").style.display = "none";
+    document.getElementById("panelMapa").classList.add("show");
+    activarNav("navMapa");
+    renderizarMapa();
+    setTimeout(() => {
+      if (mapaElementos) mapaElementos.invalidateSize();
+    }, 250);
+  }
+
+  function activarNav(idActivo) {
+    document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
+    const activo = document.getElementById(idActivo);
+    if (activo) activo.classList.add("active");
+  }
+
+  function obtenerConfigMapaSector() {
+    const sector = String(sessionStorage.getItem("sector") || "").trim().toUpperCase();
+    const mapas = window.MAPAS_SECTOR || {
+      "JUTICALPA": { nombre:"Mapa base Juticalpa", lat:14.958349515262615, lng:-86.14916699999998, zoom:11 },
+      "CATACAMAS": { nombre:"Mapa base Catacamas", lat:14.8391, lng:-85.8954, zoom:11 },
+      "CHOLUTECA": { nombre:"Mapa base Choluteca", lat:13.3003, lng:-87.1908, zoom:11 },
+      "TEGUCIGALPA": { nombre:"Mapa base Tegucigalpa", lat:14.0723, lng:-87.1921, zoom:11 },
+      "DANLI": { nombre:"Mapa base Danlí", lat:14.0333, lng:-86.5833, zoom:11 },
+      "TOCOA": { nombre:"Mapa base Tocoa", lat:15.6833, lng:-86.0000, zoom:11 },
+      "LA CEIBA": { nombre:"Mapa base La Ceiba", lat:15.7797, lng:-86.7931, zoom:11 },
+      "COMAYAGUA": { nombre:"Mapa base Comayagua", lat:14.4514, lng:-87.6375, zoom:11 }
+    };
+    return mapas[sector] || { nombre:`Mapa base ${sector || "Sector"}`, lat:14.8, lng:-86.5, zoom:8 };
+  }
+
+  function renderizarMapa() {
+    if (typeof L === "undefined") {
+      document.getElementById("detalleMapa").innerHTML = `
+        <div class="element-detail-card">
+          <div class="element-detail-header"><h3>No cargó el mapa</h3><small>Revise la conexión a internet o el CDN de Leaflet.</small></div>
+        </div>`;
+      return;
+    }
+
+    const cfg = obtenerConfigMapaSector();
+    const registros = obtenerRegistrosFiltrados().filter(reg => {
+      const lat = parseFloat(obtenerValor(reg, COL.LATITUDE).replace(",", "."));
+      const lng = parseFloat(obtenerValor(reg, COL.LONGITUDE).replace(",", "."));
+      return Number.isFinite(lat) && Number.isFinite(lng);
+    });
+
+    document.getElementById("mapaResumenTexto").textContent = `${cfg.nombre} · ${registros.length} elementos con GPS`;
+
+    if (!mapaElementos) {
+      mapaElementos = L.map("mapaElementos", {
+        zoomControl:true,
+        preferCanvas:true
+      }).setView([cfg.lat, cfg.lng], cfg.zoom || 11);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom:19,
+        attribution:"&copy; OpenStreetMap"
+      }).addTo(mapaElementos);
+    } else {
+      mapaElementos.setView([cfg.lat, cfg.lng], cfg.zoom || 11);
+    }
+
+    marcadoresMapa.forEach(m => mapaElementos.removeLayer(m));
+    marcadoresMapa = [];
+
+    const bounds = [];
+
+    registros.forEach(reg => {
+      const lat = parseFloat(obtenerValor(reg, COL.LATITUDE).replace(",", "."));
+      const lng = parseFloat(obtenerValor(reg, COL.LONGITUDE).replace(",", "."));
+      const estado = obtenerValor(reg, COL.ESTADO).toUpperCase();
+      const id = obtenerValor(reg, COL.ID_ELEMENTO);
+      const circuito = obtenerCircuitoMostrar(reg);
+      const material = obtenerValor(reg, COL.MATERIAL);
+      const markerClass = estado === "PENDIENTE" ? "marker-pendiente" : estado === "EJECUTADO" ? "marker-ejecutado" : "marker-otro";
+
+      const icon = L.divIcon({
+        className:"",
+        html:`<div class="custom-marker ${markerClass}"></div>`,
+        iconSize:[20,20],
+        iconAnchor:[10,10]
+      });
+
+      const marker = L.marker([lat, lng], { icon }).addTo(mapaElementos);
+      marker.bindPopup(`
+        <div class="map-popup-title">${escaparHtml(id)}</div>
+        <div class="map-popup-text">${escaparHtml(circuito)}<br>${escaparHtml(material)}</div>
+        <button class="map-popup-btn" onclick="seleccionarElementoMapa('${escaparAtributo(id)}')">Ver datos y fotos</button>
+      `);
+      marker.on("click", () => seleccionarElementoMapa(id));
+      marcadoresMapa.push(marker);
+      bounds.push([lat, lng]);
+    });
+
+    if (bounds.length) {
+      mapaElementos.fitBounds(bounds, { padding:[35,35], maxZoom:15 });
+    }
+  }
+
+  function seleccionarElementoMapa(id) {
+    const reg = elementosGlobal.find(r => obtenerValor(r, COL.ID_ELEMENTO) === id);
+    if (!reg) return;
+
+    const fechaBase = obtenerValor(reg, COL.FECHA_REGISTRO) || obtenerValor(reg, COL.FECHA);
+    const lat = obtenerValor(reg, COL.LATITUDE);
+    const lng = obtenerValor(reg, COL.LONGITUDE);
+    const estado = obtenerValor(reg, COL.ESTADO);
+    const fotos = obtenerFotosElemento(reg);
+
+    document.getElementById("detalleMapa").innerHTML = `
+      <div class="element-detail-card">
+        <div class="element-detail-header">
+          <h3>${escaparHtml(id || "Elemento")}</h3>
+          <small>${escaparHtml(formatearFecha(fechaBase) || "Sin fecha")}</small>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-row"><span>ID</span><strong>${escaparHtml(id)}</strong></div>
+          <div class="detail-row"><span>Circuito</span><strong>${escaparHtml(obtenerCircuitoMostrar(reg))}</strong></div>
+          <div class="detail-row"><span>Material</span><strong>${escaparHtml(obtenerValor(reg, COL.MATERIAL))}</strong></div>
+          <div class="detail-row"><span>Prioridad</span><strong>${badgePrioridad(obtenerValor(reg, COL.PRIORIDAD))}</strong></div>
+          <div class="detail-row"><span>Estado</span><strong>${badgeEstado(estado)}</strong></div>
+          <div class="detail-row"><span>Dirección</span><strong>${escaparHtml(obtenerValor(reg, COL.DIRECCION))}</strong></div>
+        </div>
+
+        <div class="detail-section">
+          <div class="photo-grid">
+            ${fotos.map(f => renderFotoMiniatura(f, id)).join("")}
+          </div>
+        </div>
+
+        <div class="detail-actions">
+          <button class="btn-icon btn-maps" onclick="abrirMaps('${escaparAtributo(lat)}','${escaparAtributo(lng)}')">
+            <i class="fas fa-map-marker-alt"></i> MAPS
+          </button>
+          ${String(estado).trim().toUpperCase() === "EJECUTADO"
+            ? `<span class="estado-ok" title="Elemento ejecutado"></span>`
+            : `<button class="btn-icon btn-ejecutar" onclick="ejecutarElemento('${escaparAtributo(id)}')"><i class="fas fa-check"></i> EJECUTAR</button>`
+          }
+        </div>
+      </div>
+    `;
+  }
+
+  function obtenerFotosElemento(reg) {
+    return [
+      { titulo:"Daño", url:obtenerValor(reg, COL.FOTO_DANO) },
+      { titulo:"Daño 2", url:obtenerValor(reg, COL.FOTO_DANO_2) },
+      { titulo:"Panorámica", url:obtenerValor(reg, COL.FOTO_PANORAMICA) },
+      { titulo:"Estructura", url:obtenerValor(reg, COL.FOTO_ESTRUCTURA) },
+      { titulo:"Cambio 1", url:obtenerValor(reg, COL.FOTO_CAMBIO_1) },
+      { titulo:"Cambio 2", url:obtenerValor(reg, COL.FOTO_CAMBIO_2) },
+      { titulo:"Cambio 3", url:obtenerValor(reg, COL.FOTO_CAMBIO_3) }
+    ].filter(f => f.url);
+  }
+
+  function renderFotoMiniatura(foto, id) {
+    if (!foto.url) {
+      return `<div class="photo-thumb photo-empty">Sin foto<label>${escaparHtml(foto.titulo)}</label></div>`;
+    }
+
+    const url = normalizarUrlImagen(foto.url);
+    return `
+      <div class="photo-thumb" onclick="abrirImagenGrande('${escaparAtributo(url)}','${escaparAtributo(foto.titulo)} - ${escaparAtributo(id)}')">
+        <img src="${escaparHtml(url)}" alt="${escaparHtml(foto.titulo)}" onerror="this.style.display='none'; this.parentElement.classList.add('photo-empty'); this.parentElement.insertAdjacentHTML('afterbegin','No se pudo cargar');">
+        <label>${escaparHtml(foto.titulo)}</label>
+      </div>
+    `;
+  }
+
+  function normalizarUrlImagen(valor) {
+    const texto = String(valor || "").trim();
+    if (!texto) return "";
+    if (/^https?:\/\//i.test(texto)) return texto;
+    return texto;
+  }
+
+  function abrirImagenGrande(url, titulo) {
+    if (!url) return;
+    document.getElementById("tituloImagenGrande").innerHTML = `<i class="fas fa-image"></i> ${escaparHtml(titulo || "Foto del elemento")}`;
+    document.getElementById("imagenGrande").src = url;
+    document.getElementById("modalImagen").classList.add("show");
+  }
+
+  function cerrarImagenGrande(event) {
+    if (event && event.target.id !== "modalImagen") return;
+    document.getElementById("modalImagen").classList.remove("show");
+    document.getElementById("imagenGrande").src = "";
   }
 
   function cerrarSesion() {
