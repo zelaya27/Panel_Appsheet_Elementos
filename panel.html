@@ -9,9 +9,1037 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
   <script src="config.js"></script>
-  <link rel="stylesheet" href="css/panel.css">
+
+  <style>
+    :root {
+      --primary:#0b5ed7;
+      --primary-dark:#084298;
+      --primary-soft:#eaf2ff;
+      --primary-hover:#d6e7ff;
+      --bg:#f5f8fc;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --border:#dbe3ef;
+      --danger:#ef4444;
+      --danger-dark:#dc2626;
+      --danger-soft:#ffe4e6;
+      --success:#16a34a;
+      --success-soft:#dcfce7;
+      --warning:#f59e0b;
+      --warning-soft:#fef3c7;
+      --orange-hover:#fed7aa;
+      --orange-hover-text:#9a3412;
+      --shadow:0 12px 35px rgba(15,23,42,.08);
+      --shadow-small:0 6px 18px rgba(15,23,42,.08);
+    }
+
+    * { box-sizing:border-box; }
+
+    body {
+      margin:0;
+      font-family:'Segoe UI', Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-width:1100px;
+    }
+
+    .sidebar {
+      position:fixed;
+      top:0;
+      left:0;
+      width:250px;
+      height:100vh;
+      background:#ffffff;
+      border-right:1px solid var(--border);
+      box-shadow:var(--shadow-small);
+      z-index:100;
+      transition:.25s ease;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+
+    .sidebar.collapsed { width:72px; }
+
+    .sidebar-top { padding:22px 16px; }
+
+    .sidebar-logo {
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding-bottom:20px;
+      border-bottom:1px solid var(--border);
+    }
+
+    .sidebar-logo img { width:52px; height:auto; }
+
+    .sidebar-logo-text {
+      font-size:24px;
+      font-weight:900;
+      color:var(--primary);
+      line-height:1;
+    }
+
+    .sidebar-logo-text small {
+      display:block;
+      font-size:11px;
+      letter-spacing:.5px;
+      margin-top:4px;
+    }
+
+    .sidebar.collapsed .sidebar-logo-text,
+    .sidebar.collapsed .nav-text,
+    .sidebar.collapsed .sidebar-user,
+    .sidebar.collapsed .logout-text {
+      display:none;
+    }
+
+    .nav {
+      margin-top:28px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .nav-item {
+      display:flex;
+      align-items:center;
+      gap:14px;
+      height:48px;
+      padding:0 14px;
+      border-radius:12px;
+      color:#0b1f4d;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .nav-item.active,
+    .nav-item:hover {
+      background:var(--primary-soft);
+      color:var(--primary);
+    }
+
+    .nav-item i {
+      width:22px;
+      text-align:center;
+      font-size:18px;
+    }
+
+    .sidebar-bottom { padding:16px; }
+
+    .sidebar-user {
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px;
+      margin-bottom:12px;
+      background:#f8fbff;
+      font-size:13px;
+    }
+
+    .sidebar-user strong {
+      display:block;
+      margin-bottom:4px;
+    }
+
+    .sidebar-user span {
+      display:block;
+      color:var(--primary);
+      font-weight:800;
+      margin-bottom:4px;
+    }
+
+    .btn-sidebar-logout {
+      width:100%;
+      height:46px;
+      border:1px solid var(--border);
+      background:#ffffff;
+      border-radius:12px;
+      color:#0b1f4d;
+      font-weight:800;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+    }
+
+    .btn-sidebar-logout:hover {
+      color:var(--danger);
+      border-color:var(--danger);
+    }
+
+    .main {
+      margin-left:250px;
+      transition:.25s ease;
+    }
+
+    .main.expanded { margin-left:72px; }
+
+    header {
+      height:92px;
+      background:#ffffff;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 28px;
+      position:sticky;
+      top:0;
+      z-index:50;
+    }
+
+    .header-left {
+      display:flex;
+      align-items:center;
+      gap:22px;
+    }
+
+    .btn-menu {
+      width:46px;
+      height:46px;
+      border:none;
+      background:var(--primary);
+      color:white;
+      border-radius:12px;
+      cursor:pointer;
+      font-size:20px;
+      box-shadow:0 8px 18px rgba(11,94,215,.22);
+    }
+
+    .title-box h1 {
+      margin:0;
+      font-size:24px;
+      color:#0b1f4d;
+      font-weight:900;
+    }
+
+    .title-box p {
+      margin:4px 0 0;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .header-right {
+      display:flex;
+      align-items:center;
+      gap:22px;
+      font-size:14px;
+    }
+
+    .header-sector,
+    .header-user {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:800;
+      color:#0b1f4d;
+    }
+
+    .header-sector i {
+      color:var(--primary);
+      font-size:20px;
+    }
+
+    .avatar {
+      width:42px;
+      height:42px;
+      border-radius:50%;
+      background:var(--primary-soft);
+      color:var(--primary);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:19px;
+    }
+
+    .header-user small {
+      display:block;
+      color:var(--primary);
+      font-weight:900;
+      margin-top:2px;
+    }
+
+    .btn-logout {
+      height:46px;
+      padding:0 18px;
+      border:1px solid var(--border);
+      background:#ffffff;
+      color:var(--danger);
+      border-radius:12px;
+      font-weight:900;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      gap:9px;
+    }
+
+    .btn-logout:hover {
+      background:var(--danger-soft);
+      border-color:var(--danger);
+    }
+
+    .container {
+      padding:28px;
+      max-width:1680px;
+      margin:0 auto;
+    }
+
+    .cards-row {
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:24px;
+      margin-bottom:24px;
+    }
+
+    .summary-card {
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      min-height:112px;
+      box-shadow:var(--shadow);
+      padding:18px 22px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .summary-card::before {
+      content:"";
+      position:absolute;
+      left:0;
+      top:0;
+      bottom:0;
+      width:5px;
+    }
+
+    .summary-card.pending::before { background:var(--danger); }
+    .summary-card.done::before { background:var(--success); }
+
+    .summary-icon {
+      width:58px;
+      height:58px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:26px;
+    }
+
+    .pending .summary-icon {
+      background:var(--danger-soft);
+      color:var(--danger);
+    }
+
+    .done .summary-icon {
+      background:var(--success-soft);
+      color:var(--success);
+    }
+
+    .summary-info {
+      flex:1;
+      padding-left:18px;
+    }
+
+    .summary-info h3 {
+      margin:0 0 8px;
+      color:#0b1f4d;
+      font-size:16px;
+      font-weight:900;
+    }
+
+    .summary-info .number {
+      font-size:30px;
+      font-weight:900;
+      line-height:1;
+    }
+
+    .pending .number { color:var(--danger); }
+    .done .number { color:var(--success); }
+
+    .summary-info p {
+      margin:8px 0 0;
+      color:#30415f;
+      font-size:14px;
+    }
+
+    .general-card {
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      min-height:112px;
+      box-shadow:var(--shadow);
+      padding:18px 22px;
+    }
+
+    .general-card h3 {
+      margin:0 0 12px;
+      color:var(--primary);
+      font-size:16px;
+      font-weight:900;
+    }
+
+    .general-row {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:14px;
+      color:#30415f;
+      font-size:14px;
+    }
+
+    .general-row i {
+      color:var(--primary);
+      width:20px;
+      margin-right:10px;
+    }
+
+    .general-row strong { color:#0b1f4d; }
+
+    .panel-box {
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:var(--shadow);
+      margin-bottom:24px;
+    }
+
+    .filters { padding:26px; }
+
+    .filters h3 {
+      margin:0 0 22px;
+      color:var(--primary);
+      font-size:17px;
+      font-weight:900;
+    }
+
+    .filters-grid {
+      display:grid;
+      grid-template-columns:1.2fr 1fr 1fr 1fr 1fr 1fr 1fr auto auto;
+      gap:18px;
+      align-items:end;
+    }
+
+    .filtro-grupo {
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .filtro-grupo label {
+      font-size:13px;
+      color:#0b1f4d;
+      font-weight:700;
+    }
+
+    .input-filtro {
+      height:48px;
+      width:100%;
+      border:1px solid var(--border);
+      border-radius:9px;
+      background:#ffffff;
+      color:var(--text);
+      padding:0 14px;
+      font-size:14px;
+      outline:none;
+    }
+
+    .input-filtro:focus {
+      border-color:var(--primary);
+      box-shadow:0 0 0 4px rgba(11,94,215,.10);
+    }
+
+    .search-wrap { position:relative; }
+
+    .search-wrap .input-filtro { padding-right:42px; }
+
+    .search-wrap i {
+      position:absolute;
+      right:14px;
+      top:50%;
+      transform:translateY(-50%);
+      color:var(--primary);
+    }
+
+    .btn-filter {
+      height:48px;
+      border:none;
+      border-radius:9px;
+      padding:0 20px;
+      font-weight:900;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      gap:9px;
+      white-space:nowrap;
+    }
+
+    .btn-limpiar {
+      background:var(--primary);
+      color:white;
+      box-shadow:0 8px 18px rgba(11,94,215,.18);
+    }
+
+    .btn-limpiar:hover {
+      background:var(--primary-dark);
+    }
+
+    .btn-exportar {
+      background:var(--success);
+      color:white;
+      box-shadow:0 8px 18px rgba(22,163,74,.18);
+    }
+
+    .btn-exportar:hover {
+      background:var(--orange-hover);
+      color:var(--orange-hover-text);
+    }
+
+    .table-panel {
+      padding:0;
+      overflow:hidden;
+    }
+
+    .table-responsive { overflow-x:auto; }
+
+    table {
+      width:100%;
+      border-collapse:collapse;
+      background:#ffffff;
+    }
+
+    th {
+      height:58px;
+      color:var(--primary);
+      font-size:13px;
+      text-transform:uppercase;
+      font-weight:900;
+      background:#fbfdff;
+      border-bottom:1px solid var(--border);
+      border-right:1px solid #eef2f7;
+      white-space:nowrap;
+    }
+
+    td {
+      padding:18px 16px;
+      border-bottom:1px solid #eef2f7;
+      border-right:1px solid #eef2f7;
+      color:#0f172a;
+      font-size:14px;
+      vertical-align:middle;
+    }
+
+    tbody tr:hover {
+      background:var(--primary-hover);
+    }
+
+    .col-id { width:150px; text-align:center; white-space:nowrap; }
+    .col-fecha { width:150px; text-align:center; white-space:nowrap; }
+    .col-circuito { width:150px; text-align:center; white-space:nowrap; }
+    .col-material { width:170px; text-align:center; white-space:nowrap; }
+    .col-direccion { min-width:320px; }
+    .col-prioridad { width:130px; text-align:center; }
+    .col-estado { width:140px; text-align:center; }
+    .col-acciones { width:330px; text-align:center; }
+
+    .badge {
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:78px;
+      padding:7px 10px;
+      border-radius:8px;
+      font-size:12px;
+      font-weight:900;
+      text-transform:uppercase;
+    }
+
+    .badge-urgente {
+      background:var(--danger-dark);
+      color:#ffffff;
+    }
+
+    .badge-alta {
+      background:var(--danger-soft);
+      color:#dc2626;
+    }
+
+    .badge-media {
+      background:var(--warning-soft);
+      color:#c26a00;
+    }
+
+    .badge-baja {
+      background:var(--success-soft);
+      color:#15803d;
+    }
+
+    .badge-pendiente {
+      background:var(--danger-soft);
+      color:#dc2626;
+    }
+
+    .badge-ejecutado {
+      background:var(--success-soft);
+      color:#15803d;
+    }
+
+    .acciones-td {
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:10px;
+      white-space:nowrap;
+    }
+
+    .btn-icon {
+      height:40px;
+      min-width:78px;
+      padding:0 12px;
+      border:1px solid var(--border);
+      background:#ffffff;
+      border-radius:8px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:7px;
+      font-weight:900;
+      color:#0f172a;
+      box-shadow:0 4px 10px rgba(15,23,42,.05);
+      transition:.18s ease;
+    }
+
+    .btn-icon:hover {
+      transform:translateY(-1px);
+      box-shadow:0 8px 16px rgba(15,23,42,.09);
+      background:var(--orange-hover);
+      color:var(--orange-hover-text);
+      border-color:#fdba74;
+    }
+
+    .btn-pdf i { color:var(--danger); }
+    .btn-maps i { color:var(--primary); }
+
+    .mensaje-tabla {
+      text-align:center;
+      color:var(--muted);
+      padding:32px;
+      font-weight:800;
+    }
+
+    .mensaje-error { color:var(--danger); }
+
+    .footer-table {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:18px 26px;
+      color:#30415f;
+      font-size:14px;
+      border-top:1px solid #eef2f7;
+      background:#ffffff;
+    }
+
+    .pagination {
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .page-btn {
+      width:38px;
+      height:38px;
+      border:1px solid var(--border);
+      background:#ffffff;
+      border-radius:8px;
+      cursor:pointer;
+      color:#0b1f4d;
+      font-weight:800;
+    }
+
+    .page-btn.active {
+      background:var(--primary);
+      color:#ffffff;
+      border-color:var(--primary);
+    }
+
+    .page-btn:disabled {
+      opacity:.45;
+      cursor:not-allowed;
+    }
+  .btn-ejecutar i {
+  color: var(--success);
+}
+
+.btn-ejecutar:hover {
+  background: var(--orange-hover);
+  color: var(--orange-hover-text);
+  border-color: #fdba74;
+}
+
+.estado-ok {
+  width: 15px;
+  height: 15px;
+  background: var(--success);
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 0 4px var(--success-soft);
+}
+    
+
+
+    .modal-overlay {
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(15,23,42,.38);
+      z-index:300;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+
+    .modal-overlay.show { display:flex; }
+
+    .modal-card {
+      width:720px;
+      max-width:95vw;
+      background:#ffffff;
+      border-radius:18px;
+      box-shadow:0 25px 70px rgba(15,23,42,.28);
+      border:1px solid var(--border);
+      overflow:hidden;
+    }
+
+    .modal-header {
+      height:64px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 22px;
+      border-bottom:1px solid var(--border);
+    }
+
+    .modal-header h3 {
+      margin:0;
+      color:#0b1f4d;
+      font-size:18px;
+      font-weight:900;
+    }
+
+    .modal-close {
+      width:38px;
+      height:38px;
+      border:none;
+      border-radius:10px;
+      background:var(--danger-soft);
+      color:var(--danger);
+      cursor:pointer;
+      font-size:18px;
+    }
+
+    .modal-body { padding:22px; }
+
+    .bar-row {
+      display:grid;
+      grid-template-columns:180px 52px 1fr;
+      gap:12px;
+      align-items:center;
+      margin-bottom:13px;
+      cursor:pointer;
+      padding:6px;
+      border-radius:10px;
+    }
+
+    .bar-row:hover { background:var(--primary-soft); }
+
+    .bar-label { font-weight:800; color:#0b1f4d; font-size:13px; }
+    .bar-count { font-weight:900; color:var(--primary); text-align:right; }
+
+    .bar-bg {
+      height:12px;
+      background:#e5edf8;
+      border-radius:999px;
+      overflow:hidden;
+    }
+
+    .bar-fill {
+      height:100%;
+      background:var(--primary);
+      border-radius:999px;
+      min-width:3px;
+    }
+
+    .modal-note {
+      margin-top:14px;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:700;
+    }
+
+
+    .map-panel {
+      display:none;
+      overflow:hidden;
+    }
+
+    .map-panel.show { display:block; }
+
+    .map-toolbar {
+      padding:18px 22px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      background:#ffffff;
+    }
+
+    .map-toolbar-title h3 {
+      margin:0;
+      font-size:18px;
+      font-weight:900;
+      color:#0b1f4d;
+    }
+
+    .map-toolbar-title p {
+      margin:4px 0 0;
+      color:var(--muted);
+      font-size:13px;
+      font-weight:700;
+    }
+
+    .map-legend {
+      display:flex;
+      gap:14px;
+      align-items:center;
+      flex-wrap:wrap;
+      font-size:13px;
+      font-weight:900;
+      color:#0b1f4d;
+    }
+
+    .legend-dot {
+      width:12px;
+      height:12px;
+      border-radius:50%;
+      display:inline-block;
+      margin-right:6px;
+      box-shadow:0 0 0 4px rgba(15,23,42,.08);
+    }
+
+    .dot-pendiente { background:var(--danger); }
+    .dot-ejecutado { background:var(--success); }
+    .dot-otro { background:var(--warning); }
+
+    .map-layout {
+      display:grid;
+      grid-template-columns:1fr 420px;
+      min-height:640px;
+    }
+
+    #mapaElementos {
+      width:100%;
+      min-height:640px;
+      background:#e5edf8;
+      z-index:1;
+    }
+
+    .map-side-card {
+      border-left:1px solid var(--border);
+      background:#f8fbff;
+      padding:18px;
+      overflow:auto;
+      max-height:640px;
+    }
+
+    .element-detail-card {
+      background:#ffffff;
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:var(--shadow-small);
+      overflow:hidden;
+    }
+
+    .element-detail-header {
+      padding:16px 18px;
+      background:linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color:#ffffff;
+    }
+
+    .element-detail-header h3 {
+      margin:0;
+      font-size:18px;
+      font-weight:900;
+    }
+
+    .element-detail-header small {
+      display:block;
+      margin-top:4px;
+      opacity:.9;
+      font-weight:700;
+    }
+
+    .detail-section {
+      padding:16px 18px;
+      border-bottom:1px solid #eef2f7;
+    }
+
+    .detail-row {
+      display:grid;
+      grid-template-columns:110px 1fr;
+      gap:10px;
+      margin-bottom:11px;
+      font-size:13px;
+    }
+
+    .detail-row:last-child { margin-bottom:0; }
+
+    .detail-row span {
+      color:var(--muted);
+      font-weight:900;
+    }
+
+    .detail-row strong {
+      color:#0b1f4d;
+      font-weight:900;
+      line-height:1.35;
+    }
+
+    .photo-grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .photo-thumb {
+      height:92px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:#eef2f7;
+      overflow:hidden;
+      cursor:pointer;
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--muted);
+      font-size:11px;
+      font-weight:900;
+      text-align:center;
+    }
+
+    .photo-thumb img {
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .photo-thumb label {
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:0;
+      background:rgba(15,23,42,.72);
+      color:white;
+      padding:4px 5px;
+      font-size:10px;
+      font-weight:900;
+    }
+
+    .photo-empty {
+      border-style:dashed;
+      background:#f8fafc;
+      cursor:default;
+    }
+
+    .detail-actions {
+      padding:16px 18px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .map-popup-title {
+      font-weight:900;
+      color:#0b1f4d;
+      margin-bottom:6px;
+      font-size:14px;
+    }
+
+    .map-popup-text {
+      font-size:12px;
+      color:#334155;
+      margin-bottom:8px;
+    }
+
+    .map-popup-btn {
+      border:none;
+      background:var(--primary);
+      color:white;
+      border-radius:8px;
+      padding:7px 10px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .custom-marker {
+      width:20px;
+      height:20px;
+      border-radius:50%;
+      border:3px solid #ffffff;
+      box-shadow:0 3px 10px rgba(15,23,42,.35);
+    }
+
+    .marker-pendiente { background:var(--danger); }
+    .marker-ejecutado { background:var(--success); }
+    .marker-otro { background:var(--warning); }
+
+    .image-modal-card {
+      width:900px;
+      max-width:96vw;
+      background:#ffffff;
+      border-radius:18px;
+      box-shadow:0 25px 70px rgba(15,23,42,.32);
+      border:1px solid var(--border);
+      overflow:hidden;
+    }
+
+    .image-modal-body {
+      padding:16px;
+      background:#0f172a;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:420px;
+    }
+
+    .image-modal-body img {
+      max-width:100%;
+      max-height:78vh;
+      border-radius:10px;
+      background:white;
+    }
+
+
+    .btn-eliminar i { color:#dc2626; }
+    .btn-eliminar:hover { background:#fee2e2; color:#991b1b; border-color:#dc2626; }
+
+    .marker-urgente { background:#dc2626; }
+    .marker-alta { background:#f97316; }
+    .marker-media { background:#38bdf8; }
+    .marker-baja { background:#ec4899; }
+
+    @media (max-width:1300px) {
+      .map-layout { grid-template-columns:1fr 360px; }
+    }
+
+  </style>
 </head>
 
 <body>
@@ -256,10 +1284,10 @@
           <p id="mapaResumenTexto">Mapa del sector con elementos filtrados</p>
         </div>
         <div class="map-legend">
-          <span><i class="legend-dot dot-urgente"></i>Urgente</span>
-          <span><i class="legend-dot dot-alta"></i>Alta</span>
-          <span><i class="legend-dot dot-media"></i>Media</span>
-          <span><i class="legend-dot dot-baja"></i>Baja</span>
+          <span><i class="legend-dot" style="background:#dc2626"></i>Urgente</span>
+          <span><i class="legend-dot" style="background:#f97316"></i>Alta</span>
+          <span><i class="legend-dot" style="background:#38bdf8"></i>Media</span>
+          <span><i class="legend-dot" style="background:#ec4899"></i>Baja</span>
         </div>
       </div>
 
@@ -309,6 +1337,908 @@
   </div>
 </div>
 
-<script src="js/panel.js"></script>
+<script>
+  let elementosGlobal = [];
+  let encabezadosGlobal = [];
+  let registrosFiltradosGlobal = [];
+  let paginaActual = 1;
+  const registrosPorPagina = 10;
+  let mapaElementos = null;
+  let marcadoresMapa = [];
+  let vistaActual = "tabla";
+
+  const COL = {
+    ID_ELEMENTO: "ID_ELEMENTO",
+    FECHA_REGISTRO: "FECHA_HORA_REGISTRO",
+    FECHA: "FECHA",
+    CIRCUITO: "CIRCUITO",
+    CIRCUITO_TXT: "CIRCUITO_TXT",
+    DIRECCION: "DIRECCION",
+    PRIORIDAD: "PRIORIDAD",
+    MATERIAL: "MATERIAL/ALTURA",
+    ESTADO: "ESTADO",
+    SECTOR: "SECTOR",
+    FILE: "FILE",
+    FOTO_DANO: "FOTO_DAÑO",
+    FOTO_DANO_2: "FOTO_DAÑO_2",
+    FOTO_PANORAMICA: "FOTO_PANORAMICA",
+    FOTO_ESTRUCTURA: "FOTO_ESTRUCTURA",
+    FOTO_CAMBIO_1: "FOTO_CAMBIO_1",
+    FOTO_CAMBIO_2: "FOTO_CAMBIO_2",
+    FOTO_CAMBIO_3: "FOTO_CAMBIO_3",
+    LATITUDE: "LATITUDE",
+    LONGITUDE: "LONGITUDE"
+  };
+
+  document.addEventListener("DOMContentLoaded", function() {
+    validarSesion();
+    cargarElementos();
+  });
+
+  function validarSesion() {
+    const usuario = sessionStorage.getItem("usuario");
+    const tipoUsuario = sessionStorage.getItem("tipo_usuario");
+    const sector = sessionStorage.getItem("sector");
+
+    if (!usuario) {
+      window.location.href = "index.html";
+      return;
+    }
+
+    document.getElementById("nombreUsuario").textContent = usuario || "";
+    document.getElementById("tipoUsuario").textContent = tipoUsuario || "";
+    document.getElementById("nombreSector").textContent = sector || "";
+
+    document.getElementById("sidebarUsuario").textContent = usuario || "";
+    document.getElementById("sidebarTipo").textContent = tipoUsuario || "";
+    document.getElementById("sidebarSector").textContent = sector || "";
+  }
+
+  function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("collapsed");
+    document.getElementById("main").classList.toggle("expanded");
+  }
+
+  function apiJSONP(params) {
+    return new Promise((resolve, reject) => {
+      const callbackName = "jsonp_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
+      params.callback = callbackName;
+
+      const query = new URLSearchParams(params).toString();
+      const script = document.createElement("script");
+
+      window[callbackName] = function(data) {
+        resolve(data);
+        script.remove();
+        delete window[callbackName];
+      };
+
+      script.onerror = function() {
+        reject(new Error("Error conectando con Apps Script"));
+        script.remove();
+        delete window[callbackName];
+      };
+
+      script.src = CONFIG.URL_APPS_SCRIPT + "?" + query;
+      document.body.appendChild(script);
+    });
+  }
+
+  async function cargarElementos() {
+    try {
+      mostrarMensajeTabla("Cargando elementos...");
+
+      const data = await apiJSONP({
+        action: "obtenerElementos"
+      });
+
+      if (!data.ok) {
+        mostrarMensajeTabla(data.error || "No se pudieron cargar los elementos.", true);
+        return;
+      }
+
+      const sectorLogin = String(sessionStorage.getItem("sector") || "")
+  .trim()
+  .toUpperCase();
+
+elementosGlobal = (data.registros || []).filter(reg => {
+  const sectorRegistro = obtenerValor(reg, COL.SECTOR)
+    .trim()
+    .toUpperCase();
+
+  return !sectorLogin || sectorRegistro === sectorLogin;
+});
+      encabezadosGlobal = data.encabezados || [];
+
+      llenarFiltros();
+      actualizarResumen();
+      renderizarTabla();
+
+    } catch (error) {
+      mostrarMensajeTabla("Error de conexión con Apps Script.", true);
+    }
+  }
+
+  function llenarFiltros() {
+    llenarSelect("filtroPrioridad", obtenerUnicosPorSector(COL.PRIORIDAD), "Todas");
+    llenarSelect("filtroCircuito", obtenerUnicosCircuito(), "Todos");
+    llenarSelect("filtroMaterial", obtenerUnicosMaterial(), "Todos");
+  }
+
+  function llenarSelect(idSelect, valores, textoDefault) {
+    const select = document.getElementById(idSelect);
+    select.innerHTML = `<option value="ALL">${textoDefault}</option>`;
+
+    valores.forEach(valor => {
+      if (valor) {
+        const option = document.createElement("option");
+        option.value = valor;
+        option.textContent = valor;
+        select.appendChild(option);
+      }
+    });
+  }
+
+  function obtenerUnicosPorSector(nombreColumna) {
+    const set = new Set();
+    const sectorLogin = String(sessionStorage.getItem("sector") || "").trim().toUpperCase();
+
+    elementosGlobal.forEach(reg => {
+      const regSector = obtenerValor(reg, COL.SECTOR).trim().toUpperCase();
+      if (sectorLogin && regSector !== sectorLogin) return;
+
+      const valor = obtenerValor(reg, nombreColumna);
+      if (valor) set.add(valor);
+    });
+
+    return Array.from(set).sort();
+  }
+
+  function obtenerCircuitoMostrar(reg) {
+    return obtenerValor(reg, COL.CIRCUITO_TXT) || obtenerValor(reg, COL.CIRCUITO);
+  }
+
+  function obtenerUnicosCircuito() {
+    const set = new Set();
+    const sectorLogin = String(sessionStorage.getItem("sector") || "").trim().toUpperCase();
+
+    elementosGlobal.forEach(reg => {
+      const regSector = obtenerValor(reg, COL.SECTOR).trim().toUpperCase();
+      if (sectorLogin && regSector !== sectorLogin) return;
+
+      const valor = obtenerCircuitoMostrar(reg);
+      if (valor) set.add(valor);
+    });
+
+    return Array.from(set).sort();
+  }
+
+  function obtenerUnicosMaterial() {
+    const set = new Set();
+    const sectorLogin = String(sessionStorage.getItem("sector") || "").trim().toUpperCase();
+
+    elementosGlobal.forEach(reg => {
+      const regSector = obtenerValor(reg, COL.SECTOR).trim().toUpperCase();
+      if (sectorLogin && regSector !== sectorLogin) return;
+
+      const valor = obtenerValor(reg, COL.MATERIAL);
+      if (valor) set.add(valor);
+    });
+
+    return Array.from(set).sort();
+  }
+
+  function obtenerRegistrosFiltrados() {
+    const estado = document.getElementById("filtroEstado").value;
+    const prioridad = document.getElementById("filtroPrioridad").value;
+    const circuito = document.getElementById("filtroCircuito").value;
+    const material = document.getElementById("filtroMaterial").value;
+    const idElemento = document.getElementById("filtroIdElemento").value.trim().toUpperCase();
+    const fechaDesde = document.getElementById("fechaDesde").value;
+    const fechaHasta = document.getElementById("fechaHasta").value;
+
+    const sectorLogin = String(sessionStorage.getItem("sector") || "").trim().toUpperCase();
+
+    let registros = elementosGlobal.filter(reg => {
+      const regSector = obtenerValor(reg, COL.SECTOR).toUpperCase();
+      const regEstado = obtenerValor(reg, COL.ESTADO).toUpperCase();
+      const regPrioridad = obtenerValor(reg, COL.PRIORIDAD);
+      const regMaterial = obtenerValor(reg, COL.MATERIAL);
+      const regCircuito = obtenerCircuitoMostrar(reg);
+      const regId = obtenerValor(reg, COL.ID_ELEMENTO).toUpperCase();
+
+      const fechaBase =
+        obtenerValor(reg, COL.FECHA_REGISTRO) ||
+        obtenerValor(reg, COL.FECHA);
+
+      const regFecha = convertirFechaInput(fechaBase);
+
+      if (sectorLogin && regSector && regSector !== sectorLogin) return false;
+      if (estado !== "ALL" && regEstado !== estado) return false;
+      if (prioridad !== "ALL" && regPrioridad !== prioridad) return false;
+      if (circuito !== "ALL" && regCircuito !== circuito) return false;
+      if (material !== "ALL" && regMaterial !== material) return false;
+      if (idElemento && !regId.includes(idElemento)) return false;
+      if (fechaDesde && regFecha && regFecha < fechaDesde) return false;
+      if (fechaHasta && regFecha && regFecha > fechaHasta) return false;
+
+      return true;
+    });
+
+    registros.sort((a, b) => {
+      const fa = convertirFechaInput(obtenerValor(a, COL.FECHA_REGISTRO) || obtenerValor(a, COL.FECHA));
+      const fb = convertirFechaInput(obtenerValor(b, COL.FECHA_REGISTRO) || obtenerValor(b, COL.FECHA));
+      return fb.localeCompare(fa);
+    });
+
+    return registros;
+  }
+
+  function renderizarTabla(resetPagina = true) {
+    const tbody = document.getElementById("tablaElementos");
+
+    if (resetPagina) paginaActual = 1;
+
+    const registros = obtenerRegistrosFiltrados();
+    registrosFiltradosGlobal = registros;
+    if (vistaActual === "mapa") renderizarMapa();
+
+    if (registros.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" class="mensaje-tabla">No hay registros para mostrar.</td></tr>`;
+      actualizarFooter(0, 0, 0);
+      return;
+    }
+
+    const inicio = (paginaActual - 1) * registrosPorPagina;
+    const fin = inicio + registrosPorPagina;
+    const paginaRegistros = registros.slice(inicio, fin);
+
+    tbody.innerHTML = "";
+
+    paginaRegistros.forEach(reg => {
+      const id = obtenerValor(reg, COL.ID_ELEMENTO);
+      const fechaBase = obtenerValor(reg, COL.FECHA_REGISTRO) || obtenerValor(reg, COL.FECHA);
+      const fecha = formatearFecha(fechaBase);
+      const circuito = obtenerCircuitoMostrar(reg);
+      const material = obtenerValor(reg, COL.MATERIAL);
+      const direccion = obtenerValor(reg, COL.DIRECCION);
+      const prioridad = obtenerValor(reg, COL.PRIORIDAD);
+      const estado = obtenerValor(reg, COL.ESTADO);
+      const file = obtenerValor(reg, COL.FILE);
+      const lat = obtenerValor(reg, COL.LATITUDE);
+      const lng = obtenerValor(reg, COL.LONGITUDE);
+
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td class="col-id">${escaparHtml(id)}</td>
+        <td class="col-fecha">${escaparHtml(fecha)}</td>
+        <td class="col-circuito">${escaparHtml(circuito)}</td>
+        <td class="col-material">${escaparHtml(material)}</td>
+        <td class="col-direccion">${escaparHtml(direccion)}</td>
+        <td class="col-prioridad">${badgePrioridad(prioridad)}</td>
+        <td class="col-estado">${badgeEstado(estado)}</td>
+        <td class="col-acciones">
+          <div class="acciones-td">
+            <button class="btn-icon btn-pdf" onclick="abrirPDF('${escaparAtributo(file)}')">
+              <i class="fas fa-file-pdf"></i> PDF
+            </button>
+
+            <button class="btn-icon btn-maps" onclick="abrirMaps('${escaparAtributo(lat)}','${escaparAtributo(lng)}')">
+              <i class="fas fa-map-marker-alt"></i> MAPS
+            </button>
+
+            ${
+              String(estado).trim().toUpperCase() === "EJECUTADO"
+                ? `<span class="estado-ok" title="Elemento ejecutado"></span>`
+                : `<button class="btn-icon btn-ejecutar" onclick="ejecutarElemento('${escaparAtributo(id)}')">
+                    <i class="fas fa-check"></i> EJECUTAR
+                   </button>`
+            }
+            <button class="btn-icon btn-eliminar" onclick="eliminarElemento('${escaparAtributo(id)}')" title="Eliminar">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+    actualizarFooter(registros.length, inicio + 1, Math.min(fin, registros.length));
+  }
+
+  function actualizarFooter(total, inicio, fin) {
+    const info = document.getElementById("infoRegistros");
+    const totalPaginas = Math.max(1, Math.ceil(total / registrosPorPagina));
+
+    info.textContent = total === 0
+      ? "Mostrando 0 elementos"
+      : `Mostrando ${inicio} a ${fin} de ${total} elementos`;
+
+    document.getElementById("paginaActual").textContent = paginaActual;
+    document.getElementById("btnPrev").disabled = paginaActual <= 1;
+    document.getElementById("btnNext").disabled = paginaActual >= totalPaginas;
+  }
+
+  function cambiarPagina(direccion) {
+    const totalPaginas = Math.max(1, Math.ceil(registrosFiltradosGlobal.length / registrosPorPagina));
+    const nuevaPagina = paginaActual + direccion;
+
+    if (nuevaPagina < 1 || nuevaPagina > totalPaginas) return;
+
+    paginaActual = nuevaPagina;
+    renderizarTabla(false);
+  }
+
+  function actualizarResumen() {
+    const sectorLogin = String(sessionStorage.getItem("sector") || "").trim().toUpperCase();
+
+    let pendiente = 0;
+    let ejecutado = 0;
+    let total = 0;
+    const circuitos = new Set();
+
+    elementosGlobal.forEach(reg => {
+      const regSector = obtenerValor(reg, COL.SECTOR).toUpperCase();
+      const estado = obtenerValor(reg, COL.ESTADO).toUpperCase();
+      const circuito = obtenerCircuitoMostrar(reg);
+
+      if (sectorLogin && regSector && regSector !== sectorLogin) return;
+
+      total++;
+
+      if (circuito) circuitos.add(circuito);
+      if (estado === "PENDIENTE") pendiente++;
+      if (estado === "EJECUTADO") ejecutado++;
+    });
+
+    document.getElementById("totalPendiente").textContent = pendiente;
+    document.getElementById("totalEjecutado").textContent = ejecutado;
+    document.getElementById("totalElementos").textContent = total;
+    document.getElementById("totalCircuitos").textContent = circuitos.size;
+    document.getElementById("ultimaActualizacion").textContent = obtenerFechaHoraActual();
+  }
+
+  function obtenerValor(reg, nombreColumna) {
+    if (!reg || !reg.obj) return "";
+    const valor = reg.obj[nombreColumna];
+    if (valor === null || valor === undefined) return "";
+    return String(valor).trim();
+  }
+
+  function badgePrioridad(prioridad) {
+    const p = String(prioridad || "").trim().toUpperCase();
+    let clase = "";
+
+    if (p === "URGENTE") clase = "badge-urgente";
+    else if (p === "ALTA") clase = "badge-alta";
+    else if (p === "MEDIA") clase = "badge-media";
+    else if (p === "BAJA") clase = "badge-baja";
+
+    return `<span class="badge ${clase}">${escaparHtml(prioridad || "")}</span>`;
+  }
+
+  function badgeEstado(estado) {
+    const e = String(estado || "").trim().toUpperCase();
+    let clase = "";
+
+    if (e === "PENDIENTE") clase = "badge-pendiente";
+    else if (e === "EJECUTADO") clase = "badge-ejecutado";
+
+    return `<span class="badge ${clase}">${escaparHtml(estado || "")}</span>`;
+  }
+
+async function abrirPDF(file) {
+  if (!file) {
+    alert("Este registro no tiene PDF.");
+    return;
+  }
+
+  if (file.startsWith("http")) {
+    window.open(file, "_blank");
+    return;
+  }
+
+  try {
+    const data = await apiJSONP({
+      action: "obtenerUrlPdfDrive",
+      ruta: file
+    });
+
+    if (data.ok && data.url) {
+      window.open(data.url, "_blank");
+    } else {
+      alert(data.error || "No se encontró el PDF.");
+    }
+
+  } catch (error) {
+    alert("Error buscando el PDF en Drive.");
+  }
+}
+
+function abrirMaps(lat, lng) {
+  if (!lat || !lng) {
+    alert("Este registro no tiene coordenadas.");
+    return;
+  }
+
+  const url = `https://www.google.com/maps?q=${encodeURIComponent(lat)},${encodeURIComponent(lng)}`;
+  window.open(url, "_blank");
+}
+
+async function ejecutarElemento(id) {
+  if (!id) {
+    alert("No se recibió ID del elemento.");
+    return;
+  }
+
+  if (!confirm("¿Desea marcar este elemento como EJECUTADO?")) {
+    return;
+  }
+
+  try {
+    const data = await apiJSONP({
+      action: "ejecutarElemento",
+      id: id
+    });
+
+    if (data.ok) {
+      const reg = elementosGlobal.find(r => obtenerValor(r, COL.ID_ELEMENTO) === id);
+      if (reg && reg.obj) reg.obj[COL.ESTADO] = "EJECUTADO";
+      actualizarResumen();
+      renderizarTabla(false);
+      if (vistaActual === "mapa") {
+        renderizarMapa();
+        seleccionarElementoMapa(id);
+      }
+      alert("Elemento ejecutado correctamente.");
+    } else {
+      alert(data.error || "No se pudo ejecutar el elemento.");
+    }
+
+  } catch (error) {
+    alert("Error actualizando el estado.");
+  }
+}
+
+
+async function eliminarElemento(id) {
+  if (!id) {
+    alert("No se recibió ID del elemento.");
+    return;
+  }
+
+  const palabra = prompt("Para eliminar este elemento escriba:\n\nELIMINAR");
+  if (palabra !== "ELIMINAR") {
+    alert("Operación cancelada.");
+    return;
+  }
+
+  if (!confirm("¿Confirma eliminar definitivamente este elemento?")) {
+    return;
+  }
+
+  try {
+    const data = await apiJSONP({
+      action: "eliminarElemento",
+      id: id
+    });
+
+    if (data.ok) {
+      elementosGlobal = elementosGlobal.filter(r => obtenerValor(r, COL.ID_ELEMENTO) !== id);
+      actualizarResumen();
+      renderizarTabla(false);
+      if (vistaActual === "mapa") {
+        renderizarMapa();
+        document.getElementById("detalleMapa").innerHTML = `
+          <div class="element-detail-card">
+            <div class="element-detail-header">
+              <h3>Seleccione un punto</h3>
+              <small>El elemento fue eliminado correctamente.</small>
+            </div>
+          </div>`;
+      }
+      alert("Elemento eliminado correctamente.");
+    } else {
+      alert(data.error || "No se pudo eliminar el elemento.");
+    }
+  } catch (error) {
+    alert("Error eliminando elemento.");
+  }
+}
+
+  function limpiarFiltros() {
+    document.getElementById("filtroEstado").value = "ALL";
+    document.getElementById("filtroPrioridad").value = "ALL";
+    document.getElementById("filtroCircuito").value = "ALL";
+    document.getElementById("filtroMaterial").value = "ALL";
+    document.getElementById("filtroIdElemento").value = "";
+    document.getElementById("fechaDesde").value = "";
+    document.getElementById("fechaHasta").value = "";
+
+    renderizarTabla();
+  }
+
+  function exportarTablaFiltrada() {
+    const registros = registrosFiltradosGlobal.length
+      ? registrosFiltradosGlobal
+      : obtenerRegistrosFiltrados();
+
+    if (!registros.length) {
+      alert("No hay datos filtrados para exportar.");
+      return;
+    }
+
+    if (typeof XLSX === "undefined") {
+      alert("No se cargó la librería de Excel. Revisa tu conexión o el CDN XLSX.");
+      return;
+    }
+
+    const encabezados = encabezadosGlobal.length
+      ? encabezadosGlobal
+      : Object.keys(registros[0].obj || {});
+
+    const filas = registros.map(reg => {
+      const fila = {};
+      encabezados.forEach(h => {
+        fila[h] = obtenerValor(reg, h);
+      });
+      return fila;
+    });
+
+    const ws = XLSX.utils.json_to_sheet(filas, { header: encabezados });
+    ws["!cols"] = encabezados.map(h => ({ wch: Math.min(Math.max(String(h).length + 4, 14), 35) }));
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "ELEMENTOS_DE_RED");
+
+    const sector = sessionStorage.getItem("sector") || "SECTOR";
+    const fecha = new Date().toISOString().substring(0, 10);
+
+    XLSX.writeFile(wb, `Elementos_Red_${sector}_${fecha}.xlsx`);
+  }
+
+
+  function abrirModalPostes() {
+    const contenedor = document.getElementById("contenidoPostes");
+    const modal = document.getElementById("modalPostes");
+
+    const datos = obtenerPendientesPorMaterial();
+
+    if (!datos.length) {
+      contenedor.innerHTML = '<div class="mensaje-tabla">No hay postes pendientes para mostrar.</div>';
+    } else {
+      const max = Math.max(...datos.map(d => d.total));
+      contenedor.innerHTML = datos.map(d => {
+        const ancho = max ? Math.round((d.total / max) * 100) : 0;
+        return `
+          <div class="bar-row" onclick="aplicarFiltroMaterial('${escaparAtributo(d.material)}')">
+            <div class="bar-label">${escaparHtml(d.material)}</div>
+            <div class="bar-count">${d.total}</div>
+            <div class="bar-bg"><div class="bar-fill" style="width:${ancho}%"></div></div>
+          </div>
+        `;
+      }).join("") + '<div class="modal-note">Solo se muestran registros PENDIENTES del sector actual. Clic en una barra para filtrar.</div>';
+    }
+
+    modal.classList.add("show");
+  }
+
+  function cerrarModalPostes(event) {
+    if (event && event.target.id !== "modalPostes") return;
+    document.getElementById("modalPostes").classList.remove("show");
+  }
+
+  function obtenerPendientesPorMaterial() {
+    const sectorLogin = String(sessionStorage.getItem("sector") || "").trim().toUpperCase();
+    const mapa = {};
+
+    elementosGlobal.forEach(reg => {
+      const regSector = obtenerValor(reg, COL.SECTOR).toUpperCase();
+      const estado = obtenerValor(reg, COL.ESTADO).toUpperCase();
+      const material = obtenerValor(reg, COL.MATERIAL) || "SIN MATERIAL";
+
+      if (sectorLogin && regSector !== sectorLogin) return;
+      if (estado !== "PENDIENTE") return;
+
+      mapa[material] = (mapa[material] || 0) + 1;
+    });
+
+    return Object.keys(mapa)
+      .map(material => ({ material, total: mapa[material] }))
+      .sort((a, b) => b.total - a.total);
+  }
+
+  function aplicarFiltroMaterial(material) {
+    cerrarModalPostes();
+    document.getElementById("filtroEstado").value = "PENDIENTE";
+    document.getElementById("filtroMaterial").value = material;
+    renderizarTabla();
+  }
+
+
+  function mostrarVistaTabla() {
+    vistaActual = "tabla";
+    document.getElementById("panelFiltros").style.display = "block";
+    document.getElementById("panelTabla").style.display = "block";
+    document.getElementById("panelMapa").classList.remove("show");
+    activarNav("navDashboard");
+  }
+
+  function mostrarVistaMapa() {
+    vistaActual = "mapa";
+    document.getElementById("panelFiltros").style.display = "block";
+    document.getElementById("panelTabla").style.display = "none";
+    document.getElementById("panelMapa").classList.add("show");
+    activarNav("navMapa");
+    renderizarMapa();
+    setTimeout(() => {
+      if (mapaElementos) mapaElementos.invalidateSize();
+    }, 250);
+  }
+
+  function activarNav(idActivo) {
+    document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
+    const activo = document.getElementById(idActivo);
+    if (activo) activo.classList.add("active");
+  }
+
+  function obtenerConfigMapaSector() {
+    const sector = String(sessionStorage.getItem("sector") || "").trim().toUpperCase();
+    const mapas = window.MAPAS_SECTOR || {
+      "JUTICALPA": { nombre:"Mapa base Juticalpa", lat:14.958349515262615, lng:-86.14916699999998, zoom:11 },
+      "CATACAMAS": { nombre:"Mapa base Catacamas", lat:14.8391, lng:-85.8954, zoom:11 },
+      "CHOLUTECA": { nombre:"Mapa base Choluteca", lat:13.3003, lng:-87.1908, zoom:11 },
+      "TEGUCIGALPA": { nombre:"Mapa base Tegucigalpa", lat:14.0723, lng:-87.1921, zoom:11 },
+      "DANLI": { nombre:"Mapa base Danlí", lat:14.0333, lng:-86.5833, zoom:11 },
+      "TOCOA": { nombre:"Mapa base Tocoa", lat:15.6833, lng:-86.0000, zoom:11 },
+      "LA CEIBA": { nombre:"Mapa base La Ceiba", lat:15.7797, lng:-86.7931, zoom:11 },
+      "COMAYAGUA": { nombre:"Mapa base Comayagua", lat:14.4514, lng:-87.6375, zoom:11 }
+    };
+    return mapas[sector] || { nombre:`Mapa base ${sector || "Sector"}`, lat:14.8, lng:-86.5, zoom:8 };
+  }
+
+  function renderizarMapa() {
+    if (typeof L === "undefined") {
+      document.getElementById("detalleMapa").innerHTML = `
+        <div class="element-detail-card">
+          <div class="element-detail-header"><h3>No cargó el mapa</h3><small>Revise la conexión a internet o el CDN de Leaflet.</small></div>
+        </div>`;
+      return;
+    }
+
+    const cfg = obtenerConfigMapaSector();
+    const registros = obtenerRegistrosFiltrados().filter(reg => {
+      const lat = parseFloat(obtenerValor(reg, COL.LATITUDE).replace(",", "."));
+      const lng = parseFloat(obtenerValor(reg, COL.LONGITUDE).replace(",", "."));
+      return Number.isFinite(lat) && Number.isFinite(lng);
+    });
+
+    document.getElementById("mapaResumenTexto").textContent = `${cfg.nombre} · ${registros.length} elementos con GPS`;
+
+    if (!mapaElementos) {
+      mapaElementos = L.map("mapaElementos", {
+        zoomControl:true,
+        preferCanvas:true
+      }).setView([cfg.lat, cfg.lng], cfg.zoom || 11);
+
+      L.tileLayer("https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
+        maxZoom:22,
+        attribution:"Google Satellite"
+      }).addTo(mapaElementos);
+    } else {
+      mapaElementos.setView([cfg.lat, cfg.lng], cfg.zoom || 11);
+    }
+
+    marcadoresMapa.forEach(m => mapaElementos.removeLayer(m));
+    marcadoresMapa = [];
+
+    const bounds = [];
+
+    registros.forEach(reg => {
+      const lat = parseFloat(obtenerValor(reg, COL.LATITUDE).replace(",", "."));
+      const lng = parseFloat(obtenerValor(reg, COL.LONGITUDE).replace(",", "."));
+      const id = obtenerValor(reg, COL.ID_ELEMENTO);
+      const circuito = obtenerCircuitoMostrar(reg);
+      const material = obtenerValor(reg, COL.MATERIAL);
+      const prioridad = obtenerValor(reg, COL.PRIORIDAD).trim().toUpperCase();
+      let markerClass = "marker-baja";
+      if (prioridad === "URGENTE") markerClass = "marker-urgente";
+      else if (prioridad === "ALTA") markerClass = "marker-alta";
+      else if (prioridad === "MEDIA") markerClass = "marker-media";
+      else if (prioridad === "BAJA") markerClass = "marker-baja";
+
+      const icon = L.divIcon({
+        className:"",
+        html:`<div class="custom-marker ${markerClass}"></div>`,
+        iconSize:[20,20],
+        iconAnchor:[10,10]
+      });
+
+      const marker = L.marker([lat, lng], { icon }).addTo(mapaElementos);
+      marker.bindPopup(`
+        <div class="map-popup-title">${escaparHtml(id)}</div>
+        <div class="map-popup-text">${escaparHtml(circuito)}<br>${escaparHtml(material)}</div>
+        <button class="map-popup-btn" onclick="seleccionarElementoMapa('${escaparAtributo(id)}')">Ver datos y fotos</button>
+      `);
+      marker.on("click", () => seleccionarElementoMapa(id));
+      marcadoresMapa.push(marker);
+      bounds.push([lat, lng]);
+    });
+
+    if (bounds.length) {
+      mapaElementos.fitBounds(bounds, { padding:[35,35], maxZoom:15 });
+    }
+  }
+
+  function seleccionarElementoMapa(id) {
+    const reg = elementosGlobal.find(r => obtenerValor(r, COL.ID_ELEMENTO) === id);
+    if (!reg) return;
+
+    const fechaBase = obtenerValor(reg, COL.FECHA_REGISTRO) || obtenerValor(reg, COL.FECHA);
+    const lat = obtenerValor(reg, COL.LATITUDE);
+    const lng = obtenerValor(reg, COL.LONGITUDE);
+    const estado = obtenerValor(reg, COL.ESTADO);
+    const fotos = obtenerFotosElemento(reg);
+
+    document.getElementById("detalleMapa").innerHTML = `
+      <div class="element-detail-card">
+        <div class="element-detail-header">
+          <h3>${escaparHtml(id || "Elemento")}</h3>
+          <small>${escaparHtml(formatearFecha(fechaBase) || "Sin fecha")}</small>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-row"><span>ID</span><strong>${escaparHtml(id)}</strong></div>
+          <div class="detail-row"><span>Circuito</span><strong>${escaparHtml(obtenerCircuitoMostrar(reg))}</strong></div>
+          <div class="detail-row"><span>Material</span><strong>${escaparHtml(obtenerValor(reg, COL.MATERIAL))}</strong></div>
+          <div class="detail-row"><span>Prioridad</span><strong>${badgePrioridad(obtenerValor(reg, COL.PRIORIDAD))}</strong></div>
+          <div class="detail-row"><span>Estado</span><strong>${badgeEstado(estado)}</strong></div>
+          <div class="detail-row"><span>Dirección</span><strong>${escaparHtml(obtenerValor(reg, COL.DIRECCION))}</strong></div>
+        </div>
+
+        <div class="detail-section">
+          <div class="photo-grid">
+            ${fotos.map(f => renderFotoMiniatura(f, id)).join("")}
+          </div>
+        </div>
+
+        <div class="detail-actions">
+          <button class="btn-icon btn-maps" onclick="abrirMaps('${escaparAtributo(lat)}','${escaparAtributo(lng)}')">
+            <i class="fas fa-map-marker-alt"></i> MAPS
+          </button>
+          ${String(estado).trim().toUpperCase() === "EJECUTADO"
+            ? `<span class="estado-ok" title="Elemento ejecutado"></span>`
+            : `<button class="btn-icon btn-ejecutar" onclick="ejecutarElemento('${escaparAtributo(id)}')"><i class="fas fa-check"></i> EJECUTAR</button>`
+          }
+          <button class="btn-icon btn-eliminar" onclick="eliminarElemento('${escaparAtributo(id)}')" title="Eliminar"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>
+    `;
+  }
+
+  function obtenerFotosElemento(reg) {
+    return [
+      { titulo:"Daño", url:obtenerValor(reg, COL.FOTO_DANO) },
+      { titulo:"Daño 2", url:obtenerValor(reg, COL.FOTO_DANO_2) },
+      { titulo:"Panorámica", url:obtenerValor(reg, COL.FOTO_PANORAMICA) },
+      { titulo:"Estructura", url:obtenerValor(reg, COL.FOTO_ESTRUCTURA) },
+      { titulo:"Cambio 1", url:obtenerValor(reg, COL.FOTO_CAMBIO_1) },
+      { titulo:"Cambio 2", url:obtenerValor(reg, COL.FOTO_CAMBIO_2) },
+      { titulo:"Cambio 3", url:obtenerValor(reg, COL.FOTO_CAMBIO_3) }
+    ].filter(f => f.url);
+  }
+
+  function renderFotoMiniatura(foto, id) {
+    if (!foto.url) {
+      return `<div class="photo-thumb photo-empty">Sin foto<label>${escaparHtml(foto.titulo)}</label></div>`;
+    }
+
+    const url = normalizarUrlImagen(foto.url);
+    return `
+      <div class="photo-thumb" onclick="abrirImagenGrande('${escaparAtributo(url)}','${escaparAtributo(foto.titulo)} - ${escaparAtributo(id)}')">
+        <img src="${escaparHtml(url)}" alt="${escaparHtml(foto.titulo)}" onerror="this.style.display='none'; this.parentElement.classList.add('photo-empty'); this.parentElement.insertAdjacentHTML('afterbegin','No se pudo cargar');">
+        <label>${escaparHtml(foto.titulo)}</label>
+      </div>
+    `;
+  }
+
+  function normalizarUrlImagen(valor) {
+    const texto = String(valor || "").trim();
+    if (!texto) return "";
+    if (/^https?:\/\//i.test(texto)) return texto;
+    return texto;
+  }
+
+  function abrirImagenGrande(url, titulo) {
+    if (!url) return;
+    document.getElementById("tituloImagenGrande").innerHTML = `<i class="fas fa-image"></i> ${escaparHtml(titulo || "Foto del elemento")}`;
+    document.getElementById("imagenGrande").src = url;
+    document.getElementById("modalImagen").classList.add("show");
+  }
+
+  function cerrarImagenGrande(event) {
+    if (event && event.target.id !== "modalImagen") return;
+    document.getElementById("modalImagen").classList.remove("show");
+    document.getElementById("imagenGrande").src = "";
+  }
+
+  function cerrarSesion() {
+    sessionStorage.clear();
+    window.location.href = "index.html";
+  }
+
+  function mostrarMensajeTabla(mensaje, error = false) {
+    const tbody = document.getElementById("tablaElementos");
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" class="mensaje-tabla ${error ? "mensaje-error" : ""}">
+          ${escaparHtml(mensaje)}
+        </td>
+      </tr>
+    `;
+  }
+
+  function formatearFecha(valor) {
+    const fechaInput = convertirFechaInput(valor);
+    if (!fechaInput) return valor || "";
+
+    const partes = fechaInput.split("-");
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+  }
+
+  function convertirFechaInput(valor) {
+    if (!valor) return "";
+
+    valor = String(valor).trim();
+
+    if (/^\d{4}-\d{2}-\d{2}/.test(valor)) {
+      return valor.substring(0, 10);
+    }
+
+    const partes = valor.split(/[\/\s:]+/);
+
+    if (partes.length >= 3) {
+      let dia = partes[0].padStart(2, "0");
+      let mes = partes[1].padStart(2, "0");
+      let anio = partes[2];
+
+      if (anio.length === 2) anio = "20" + anio;
+
+      return `${anio}-${mes}-${dia}`;
+    }
+
+    return "";
+  }
+
+  function obtenerFechaHoraActual() {
+    const ahora = new Date();
+    const dia = String(ahora.getDate()).padStart(2, "0");
+    const mes = String(ahora.getMonth() + 1).padStart(2, "0");
+    const anio = ahora.getFullYear();
+    const hora = String(ahora.getHours()).padStart(2, "0");
+    const min = String(ahora.getMinutes()).padStart(2, "0");
+
+    return `${dia}/${mes}/${anio} ${hora}:${min}`;
+  }
+
+  function escaparHtml(texto) {
+    return String(texto ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function escaparAtributo(texto) {
+    return String(texto ?? "")
+      .replace(/\\/g, "\\\\")
+      .replace(/'/g, "\\'")
+      .replace(/"/g, "&quot;")
+      .replace(/\n/g, " ");
+  }
+</script>
+
 </body>
 </html>
