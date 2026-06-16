@@ -408,10 +408,10 @@
       margin-bottom:24px;
     }
 
-    .filters { padding:26px; }
+    .filters { padding:18px; }
 
     .filters h3 {
-      margin:0 0 22px;
+      margin:0 0 14px;
       color:var(--primary);
       font-size:17px;
       font-weight:900;
@@ -419,32 +419,32 @@
 
     .filters-grid {
       display:grid;
-      grid-template-columns:1.2fr 1fr 1fr 1fr 1fr 1fr 1fr auto auto;
-      gap:18px;
+      grid-template-columns:1.15fr .95fr 1fr .85fr .85fr .72fr .72fr .68fr auto auto;
+      gap:10px;
       align-items:end;
     }
 
     .filtro-grupo {
       display:flex;
       flex-direction:column;
-      gap:8px;
+      gap:5px;
     }
 
     .filtro-grupo label {
-      font-size:13px;
+      font-size:12px;
       color:#0b1f4d;
       font-weight:700;
     }
 
     .input-filtro {
-      height:48px;
+      height:42px;
       width:100%;
       border:1px solid var(--border);
       border-radius:9px;
       background:#ffffff;
       color:var(--text);
-      padding:0 14px;
-      font-size:14px;
+      padding:0 10px;
+      font-size:13px;
       outline:none;
     }
 
@@ -466,10 +466,10 @@
     }
 
     .btn-filter {
-      height:48px;
+      height:42px;
       border:none;
       border-radius:9px;
-      padding:0 20px;
+      padding:0 13px;
       font-weight:900;
       cursor:pointer;
       display:flex;
@@ -698,7 +698,7 @@
       position:fixed;
       inset:0;
       background:rgba(15,23,42,.38);
-      z-index:300;
+      z-index:5000;
       align-items:center;
       justify-content:center;
       padding:24px;
@@ -1003,6 +1003,8 @@
 
     .image-modal-card {
       width:900px;
+      position:relative;
+      z-index:5001;
       max-width:96vw;
       background:#ffffff;
       border-radius:18px;
@@ -1217,6 +1219,13 @@
         </div>
 
         <div class="filtro-grupo">
+          <label>TS</label>
+          <select id="filtroTS" class="input-filtro" onchange="renderizarTabla()">
+            <option value="ALL">Todos</option>
+          </select>
+        </div>
+
+        <div class="filtro-grupo">
           <label>Fecha Inicio</label>
           <input type="date" id="fechaDesde" class="input-filtro" onchange="renderizarTabla()">
         </div>
@@ -1358,6 +1367,7 @@
     CIRCUITO_TXT: "CIRCUITO_TXT",
     DIRECCION: "DIRECCION",
     PRIORIDAD: "PRIORIDAD",
+    TS: "POSTE_CON_TRANSFORMADOR",
     MATERIAL: "MATERIAL/ALTURA",
     ESTADO: "ESTADO",
     SECTOR: "SECTOR",
@@ -1464,6 +1474,7 @@ elementosGlobal = (data.registros || []).filter(reg => {
 
   function llenarFiltros() {
     llenarSelect("filtroPrioridad", obtenerUnicosPorSector(COL.PRIORIDAD), "Todas");
+    llenarSelect("filtroTS", obtenerUnicosPorSector(COL.TS), "Todos");
     llenarSelect("filtroCircuito", obtenerUnicosCircuito(), "Todos");
     llenarSelect("filtroMaterial", obtenerUnicosMaterial(), "Todos");
   }
@@ -1500,14 +1511,14 @@ elementosGlobal = (data.registros || []).filter(reg => {
   function obtenerCircuitoMostrar(reg) {
     if (!reg) return "";
 
-    // Prioridad 1: valor calculado por Apps Script desde la hoja circuitos
-    if (reg.circuitoMostrar) return String(reg.circuitoMostrar).trim();
-
-    // Prioridad 2: última columna visible enviada como CIRCUITO_TXT
+    // 1) Primero usar CIRCUITO_TXT si viene en la última columna de la hoja.
     const circuitoTxt = obtenerValor(reg, COL.CIRCUITO_TXT);
     if (circuitoTxt) return circuitoTxt;
 
-    // Prioridad 3: fallback al número original del circuito
+    // 2) Luego usar circuitoMostrar enviado por Apps Script.
+    if (reg.circuitoMostrar) return String(reg.circuitoMostrar).trim();
+
+    // 3) Último respaldo: número original de CIRCUITO.
     return obtenerValor(reg, COL.CIRCUITO);
   }
 
@@ -1544,6 +1555,7 @@ elementosGlobal = (data.registros || []).filter(reg => {
   function obtenerRegistrosFiltrados() {
     const estado = document.getElementById("filtroEstado").value;
     const prioridad = document.getElementById("filtroPrioridad").value;
+    const ts = document.getElementById("filtroTS").value;
     const circuito = document.getElementById("filtroCircuito").value;
     const material = document.getElementById("filtroMaterial").value;
     const idElemento = document.getElementById("filtroIdElemento").value.trim().toUpperCase();
@@ -1556,6 +1568,7 @@ elementosGlobal = (data.registros || []).filter(reg => {
       const regSector = obtenerValor(reg, COL.SECTOR).toUpperCase();
       const regEstado = obtenerValor(reg, COL.ESTADO).toUpperCase();
       const regPrioridad = obtenerValor(reg, COL.PRIORIDAD);
+      const regTS = obtenerValor(reg, COL.TS);
       const regMaterial = obtenerValor(reg, COL.MATERIAL);
       const regCircuito = obtenerCircuitoMostrar(reg);
       const regId = obtenerValor(reg, COL.ID_ELEMENTO).toUpperCase();
@@ -1569,6 +1582,7 @@ elementosGlobal = (data.registros || []).filter(reg => {
       if (sectorLogin && regSector !== sectorLogin) return false;
       if (estado !== "ALL" && regEstado !== estado) return false;
       if (prioridad !== "ALL" && regPrioridad !== prioridad) return false;
+      if (ts !== "ALL" && regTS !== ts) return false;
       if (circuito !== "ALL" && regCircuito !== circuito) return false;
       if (material !== "ALL" && regMaterial !== material) return false;
       if (idElemento && !regId.includes(idElemento)) return false;
@@ -1863,6 +1877,7 @@ async function eliminarElemento(id) {
   function limpiarFiltros() {
     document.getElementById("filtroEstado").value = "ALL";
     document.getElementById("filtroPrioridad").value = "ALL";
+    document.getElementById("filtroTS").value = "ALL";
     document.getElementById("filtroCircuito").value = "ALL";
     document.getElementById("filtroMaterial").value = "ALL";
     document.getElementById("filtroIdElemento").value = "";
@@ -2209,8 +2224,8 @@ async function eliminarElemento(id) {
         });
 
         if (data.ok && (data.miniatura || data.url)) {
-          const miniatura = data.miniatura || data.url;
-          const grande = data.url || data.miniatura;
+          const miniatura = data.miniatura || data.grande || data.url;
+          const grande = data.grande || data.url || data.miniatura;
 
           contenedor.classList.remove("photo-empty");
           contenedor.onclick = function() {
@@ -2234,14 +2249,23 @@ async function eliminarElemento(id) {
 
   function abrirImagenGrande(url, titulo) {
     if (!url) return;
+    const modal = document.getElementById("modalImagen");
+    const img = document.getElementById("imagenGrande");
     document.getElementById("tituloImagenGrande").innerHTML = `<i class="fas fa-image"></i> ${escaparHtml(titulo || "Foto del elemento")}`;
-    document.getElementById("imagenGrande").src = url;
-    document.getElementById("modalImagen").classList.add("show");
+    img.onerror = function() {
+      alert("No se pudo abrir la foto en grande. Se intentará abrir en una pestaña nueva.");
+      window.open(url, "_blank");
+    };
+    img.src = url;
+    modal.classList.add("show");
+    modal.style.display = "flex";
   }
 
   function cerrarImagenGrande(event) {
     if (event && event.target.id !== "modalImagen") return;
-    document.getElementById("modalImagen").classList.remove("show");
+    const modal = document.getElementById("modalImagen");
+    modal.classList.remove("show");
+    modal.style.display = "";
     document.getElementById("imagenGrande").src = "";
   }
 
