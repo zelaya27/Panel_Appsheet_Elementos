@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
   <script src="config.js"></script>
 
   <style>
@@ -1345,6 +1346,8 @@
   const registrosPorPagina = 10;
   let mapaElementos = null;
   let marcadoresMapa = [];
+  let capaMapaBaseSector = null;
+  let mapaBaseSectorActivo = "";
   let vistaActual = "tabla";
 
   const COL = {
@@ -1495,7 +1498,17 @@ elementosGlobal = (data.registros || []).filter(reg => {
   }
 
   function obtenerCircuitoMostrar(reg) {
-    return obtenerValor(reg, COL.CIRCUITO_TXT) || obtenerValor(reg, COL.CIRCUITO);
+    if (!reg) return "";
+
+    // Prioridad 1: valor calculado por Apps Script desde la hoja circuitos
+    if (reg.circuitoMostrar) return String(reg.circuitoMostrar).trim();
+
+    // Prioridad 2: última columna visible enviada como CIRCUITO_TXT
+    const circuitoTxt = obtenerValor(reg, COL.CIRCUITO_TXT);
+    if (circuitoTxt) return circuitoTxt;
+
+    // Prioridad 3: fallback al número original del circuito
+    return obtenerValor(reg, COL.CIRCUITO);
   }
 
   function obtenerUnicosCircuito() {
@@ -1553,7 +1566,7 @@ elementosGlobal = (data.registros || []).filter(reg => {
 
       const regFecha = convertirFechaInput(fechaBase);
 
-      if (sectorLogin && regSector && regSector !== sectorLogin) return false;
+      if (sectorLogin && regSector !== sectorLogin) return false;
       if (estado !== "ALL" && regEstado !== estado) return false;
       if (prioridad !== "ALL" && regPrioridad !== prioridad) return false;
       if (circuito !== "ALL" && regCircuito !== circuito) return false;
@@ -1683,7 +1696,7 @@ elementosGlobal = (data.registros || []).filter(reg => {
       const estado = obtenerValor(reg, COL.ESTADO).toUpperCase();
       const circuito = obtenerCircuitoMostrar(reg);
 
-      if (sectorLogin && regSector && regSector !== sectorLogin) return;
+      if (sectorLogin && regSector !== sectorLogin) return;
 
       total++;
 
@@ -1998,6 +2011,40 @@ async function eliminarElemento(id) {
     return mapas[sector] || { nombre:`Mapa base ${sector || "Sector"}`, lat:14.8, lng:-86.5, zoom:8 };
   }
 
+  function cargarMapaBaseSector(cfg) {
+    if (!mapaElementos || !cfg || !cfg.mid) return;
+
+    const mid = String(cfg.mid || "").trim();
+    if (!mid) return;
+
+    if (mapaBaseSectorActivo === mid && capaMapaBaseSector) return;
+
+    try {
+      if (capaMapaBaseSector) {
+        mapaElementos.removeLayer(capaMapaBaseSector);
+        capaMapaBaseSector = null;
+      }
+
+      mapaBaseSectorActivo = mid;
+
+      if (typeof omnivore === "undefined") {
+        console.warn("No cargó leaflet-omnivore. No se puede cargar el mapa base KML.");
+        return;
+      }
+
+      const urlKml = "https://www.google.com/maps/d/kml?mid=" + encodeURIComponent(mid) + "&forcekml=1";
+
+      capaMapaBaseSector = omnivore.kml(urlKml)
+        .on("error", function(err) {
+          console.warn("No se pudo cargar el mapa base del sector:", err);
+        })
+        .addTo(mapaElementos);
+
+    } catch (error) {
+      console.warn("Error cargando mapa base del sector:", error);
+    }
+  }
+
   function renderizarMapa() {
     if (typeof L === "undefined") {
       document.getElementById("detalleMapa").innerHTML = `
@@ -2029,6 +2076,8 @@ async function eliminarElemento(id) {
     } else {
       mapaElementos.setView([cfg.lat, cfg.lng], cfg.zoom || 11);
     }
+
+    cargarMapaBaseSector(cfg);
 
     marcadoresMapa.forEach(m => mapaElementos.removeLayer(m));
     marcadoresMapa = [];
@@ -2099,7 +2148,7 @@ async function eliminarElemento(id) {
 
         <div class="detail-section">
           <div class="photo-grid">
-            ${fotos.map(f => renderFotoMiniatura(f, id)).join("")}
+            ${fotos.map((f, i) => renderFotoMiniatura(f, id, i)).join("")}
           </div>
         </div>
 
@@ -2115,6 +2164,8 @@ async function eliminarElemento(id) {
         </div>
       </div>
     `;
+
+    cargarFotosMiniaturas(fotos, id);
   }
 
   function obtenerFotosElemento(reg) {
@@ -2129,25 +2180,56 @@ async function eliminarElemento(id) {
     ].filter(f => f.url);
   }
 
-  function renderFotoMiniatura(foto, id) {
-    if (!foto.url) {
-      return `<div class="photo-thumb photo-empty">Sin foto<label>${escaparHtml(foto.titulo)}</label></div>`;
-    }
-
-    const url = normalizarUrlImagen(foto.url);
+  function renderFotoMiniatura(foto, id, index) {
+    const thumbId = "thumb_" + limpiarIdHtml(id) + "_" + index;
     return `
-      <div class="photo-thumb" onclick="abrirImagenGrande('${escaparAtributo(url)}','${escaparAtributo(foto.titulo)} - ${escaparAtributo(id)}')">
-        <img src="${escaparHtml(url)}" alt="${escaparHtml(foto.titulo)}" onerror="this.style.display='none'; this.parentElement.classList.add('photo-empty'); this.parentElement.insertAdjacentHTML('afterbegin','No se pudo cargar');">
+      <div class="photo-thumb" id="${thumbId}">
+        Cargando...
         <label>${escaparHtml(foto.titulo)}</label>
       </div>
     `;
   }
 
-  function normalizarUrlImagen(valor) {
-    const texto = String(valor || "").trim();
-    if (!texto) return "";
-    if (/^https?:\/\//i.test(texto)) return texto;
-    return texto;
+  function limpiarIdHtml(texto) {
+    return String(texto || "")
+      .replace(/[^a-zA-Z0-9_-]/g, "_");
+  }
+
+  async function cargarFotosMiniaturas(fotos, id) {
+    for (let i = 0; i < fotos.length; i++) {
+      const foto = fotos[i];
+      const thumbId = "thumb_" + limpiarIdHtml(id) + "_" + i;
+      const contenedor = document.getElementById(thumbId);
+      if (!contenedor) continue;
+
+      try {
+        const data = await apiJSONP({
+          action: "obtenerUrlImagen",
+          ruta: foto.url
+        });
+
+        if (data.ok && (data.miniatura || data.url)) {
+          const miniatura = data.miniatura || data.url;
+          const grande = data.url || data.miniatura;
+
+          contenedor.classList.remove("photo-empty");
+          contenedor.onclick = function() {
+            abrirImagenGrande(grande, foto.titulo + " - " + id);
+          };
+          contenedor.innerHTML = `
+            <img src="${escaparHtml(miniatura)}" alt="${escaparHtml(foto.titulo)}"
+              onerror="this.style.display='none'; this.parentElement.classList.add('photo-empty'); this.parentElement.insertAdjacentHTML('afterbegin','No se pudo cargar');">
+            <label>${escaparHtml(foto.titulo)}</label>
+          `;
+        } else {
+          contenedor.classList.add("photo-empty");
+          contenedor.innerHTML = `No se encontró<label>${escaparHtml(foto.titulo)}</label>`;
+        }
+      } catch (error) {
+        contenedor.classList.add("photo-empty");
+        contenedor.innerHTML = `Error<label>${escaparHtml(foto.titulo)}</label>`;
+      }
+    }
   }
 
   function abrirImagenGrande(url, titulo) {

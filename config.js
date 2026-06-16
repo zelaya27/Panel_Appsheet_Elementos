@@ -1,5 +1,5 @@
 const CONFIG = {
-  URL_APPS_SCRIPT: "https://script.google.com/macros/s/AKfycbzq8WS4P_Va_0-T40EN_MfRWJKFp2m-bsNfFFXKuxrLe9sAipDdngrzQFvt3TiG3sh0/exec",
+  URL_APPS_SCRIPT: "https://script.google.com/macros/s/AKfycbxWgSDOn__o7nXG1xbt6wnO96Yj1RBGlXLIup2x8zkmb6KE7V8l6ncF9_njJ8xheJ0-/exec",
   APPSHEET_APP_NAME: "APP_INSPECCIONES-236810661"
 };
 
@@ -19,4 +19,3 @@ window.MAPAS_SECTOR = {
     zoom: 9
   }
 };
-
