@@ -2218,10 +2218,14 @@ async function eliminarElemento(id) {
       if (!contenedor) continue;
 
       try {
+
         const data = await apiJSONP({
-          action: "obtenerUrlImagen",
-          ruta: foto.url
-        });
+  action: "obtenerUrlImagen",
+  ruta: foto.url
+});
+
+console.log("RESPUESTA FOTO:", data);
+     
 
         if (data.ok && (data.miniatura || data.url)) {
           const miniatura = data.miniatura || data.grande || data.url;
